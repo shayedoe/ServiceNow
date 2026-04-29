@@ -223,19 +223,35 @@ async function renderResources() {
       <ul>${(s.questions || []).map(q => `<li>${escapeHtml(q)}</li>`).join('')}</ul>
     </div>`).join('');
 
-  const playbooks = Object.entries(r.troubleshooting_playbooks || {}).map(([k, steps]) => `
+  const playbooks = Object.entries(r.troubleshooting_playbooks || {}).map(([k, pb]) => {
+    const steps = Array.isArray(pb) ? pb : (pb && pb.steps) || [];
+    const title = (pb && pb.title) || k.replace(/_/g, ' / ');
+    const when = (pb && pb.when_to_use) ? `<div class="res-when"><em>When:</em> ${escapeHtml(pb.when_to_use)}</div>` : '';
+    return `
     <div class="res-card">
-      <div class="res-card-h">${escapeHtml(k.replace(/_/g, ' / ').toUpperCase())}</div>
-      <ol>${(steps || []).map(s => `<li>${escapeHtml(s)}</li>`).join('')}</ol>
-    </div>`).join('');
+      <div class="res-card-h">${escapeHtml(title)}</div>
+      ${when}
+      <ol>${steps.map(s => `<li>${escapeHtml(typeof s === 'string' ? s : (s.text || JSON.stringify(s)))}</li>`).join('')}</ol>
+    </div>`;
+  }).join('');
 
-  const commands = `<table class="res-table"><thead><tr><th>Platform</th><th>Command</th><th>Purpose</th></tr></thead><tbody>
-    ${(r.common_commands || []).map(c => `<tr>
-      <td>${escapeHtml(c.platform)}</td>
-      <td><code>${escapeHtml(c.command)}</code></td>
-      <td>${escapeHtml(c.purpose)}</td>
-    </tr>`).join('')}
-  </tbody></table>`;
+  // common_commands can be either an array of {platform,command,purpose} OR a dict of group -> [{cmd,what}]
+  let commands = '';
+  const cc = r.common_commands;
+  if (Array.isArray(cc)) {
+    commands = `<table class="res-table"><thead><tr><th>Platform</th><th>Command</th><th>Purpose</th></tr></thead><tbody>
+      ${cc.map(c => `<tr><td>${escapeHtml(c.platform || '')}</td><td><code>${escapeHtml(c.command || c.cmd || '')}</code></td><td>${escapeHtml(c.purpose || c.what || '')}</td></tr>`).join('')}
+    </tbody></table>`;
+  } else if (cc && typeof cc === 'object') {
+    commands = Object.entries(cc).map(([group, list]) => `
+      <div class="res-card">
+        <div class="res-card-h">${escapeHtml(group.replace(/_/g, ' ').toUpperCase())}</div>
+        <table class="res-table"><thead><tr><th>Command</th><th>Purpose</th></tr></thead><tbody>
+          ${(list || []).map(c => `<tr><td><code>${escapeHtml(c.cmd || c.command || '')}</code></td><td>${escapeHtml(c.what || c.purpose || '')}</td></tr>`).join('')}
+        </tbody></table>
+      </div>`).join('');
+    if (commands) commands = `<div class="res-grid">${commands}</div>`;
+  }
 
   const tips = `<ol class="res-list">${(r.coaching_tips || []).map(t => `<li>${escapeHtml(t)}</li>`).join('')}</ol>`;
 
@@ -593,15 +609,43 @@ function wireTab(_ignored) { /* no-op — handled via delegation */ }
 
 // ----- Related lists (fetched live for SN tickets) -----
 function renderRelatedList(t) {
-  if (state.source !== 'live' || !t.sn?.sys_id) {
-    return '<div class="empty">Related lists are only populated for live ServiceNow incidents.</div>';
+  if (state.source === 'live' && t.sn?.sys_id) {
+    return '<div class="empty">Loading\u2026</div>';
   }
-  return '<div class="empty">Loading\u2026</div>';
+  // Authored / offline: render synthetic related lists from local data
+  return renderAuthoredRelatedList(t);
+}
+
+function renderAuthoredRelatedList(t) {
+  const rel = state.currentRelated;
+  if (rel === 'task_slas') {
+    const dl = t.response_deadline_minutes;
+    if (!dl) return '<div class="empty">No SLA defined for this ticket.</div>';
+    return `<table class="related-table"><thead><tr><th>SLA</th><th>Target</th><th>Stage</th><th>Status</th></tr></thead><tbody>
+      <tr><td>Initial response</td><td>${dl} min</td><td>${escapeHtml(t.state || 'In Progress')}</td><td>${t.state === 'Resolved' ? 'Met' : 'In progress'}</td></tr>
+    </tbody></table>`;
+  }
+  if (rel === 'affected_cis' || rel === 'impacted_services') {
+    const ci = (t.scenario_detail?.servicenow_seed?.cmdb_ci) || '';
+    const svc = (t.scenario_detail?.servicenow_seed?.business_service) || '';
+    const rows = [];
+    if (ci) rows.push(`<tr><td>${escapeHtml(ci)}</td><td>Configuration Item</td></tr>`);
+    if (svc) rows.push(`<tr><td>${escapeHtml(svc)}</td><td>Business Service</td></tr>`);
+    if (!rows.length) return '<div class="empty">No CIs linked.</div>';
+    return `<table class="related-table"><thead><tr><th>Item</th><th>Type</th></tr></thead><tbody>${rows.join('')}</tbody></table>`;
+  }
+  if (rel === 'child_incidents') {
+    const sims = similarTickets(t);
+    if (!sims.length) return '<div class="empty">No child or related incidents in this queue.</div>';
+    const rows = sims.map(s => `<tr><td>${escapeHtml(s.number)}</td><td>${escapeHtml(s.short_description)}</td><td>${escapeHtml(s.state || 'New')}</td><td>${escapeHtml(s.assignment_group || '')}</td></tr>`).join('');
+    return `<table class="related-table"><thead><tr><th>Number</th><th>Short description</th><th>State</th><th>Assignment group</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }
+  return '<div class="empty">No data.</div>';
 }
 
 async function renderRelatedListAsync(t) {
   if (state.source !== 'live' || !t.sn?.sys_id) {
-    return '<div class="empty">Related lists are only populated for live ServiceNow incidents.</div>';
+    return renderAuthoredRelatedList(t);
   }
   const sysId = t.sn.sys_id;
   try {
@@ -785,12 +829,16 @@ function renderTrainingPanel(t) {
   if (!t) return;
   const required = t.required_events || [];
   const performed = new Set((t.events || []).map(e => e.action_type));
-  const items = required.map(e => `
-    <div class="checklist-item ${performed.has(e) ? 'done' : ''}">
-      <div class="check"></div>
+  const manual = new Set(t.manual_checks || []);
+  const items = required.map(e => {
+    const auto = performed.has(e);
+    const checked = auto || manual.has(e);
+    return `
+    <div class="checklist-item ${checked ? 'done' : ''} ${auto && !manual.has(e) ? 'auto' : ''}" data-check="${e}" title="${auto ? 'Recorded automatically — click to override' : 'Click to mark complete'}">
+      <div class="check">${checked ? '&#10003;' : ''}</div>
       <div class="label">${labelFor(e)}</div>
-    </div>
-  `).join('') || '<div class="empty">No required actions defined for this ticket.</div>';
+    </div>`;
+  }).join('') || '<div class="empty">No required actions defined for this ticket.</div>';
   $('#checklist').innerHTML = items;
 
   // Quick action buttons
@@ -1058,6 +1106,20 @@ function formatDate(s) {
 function priorityLabel(p) {
   return ['', 'Critical', 'High', 'Moderate', 'Low', 'Planning'][Number(p)] || '';
 }
+
+function showToast(msg) {
+  let el = document.getElementById('toast');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'toast';
+    el.className = 'toast';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 3500);
+}
 function gradeLetter(pct) {
   if (pct >= 90) return 'A';
   if (pct >= 80) return 'B';
@@ -1160,14 +1222,26 @@ async function waitForServer() {
     if (id === 'fCategory') return renderIncidentView(state.currentTicket);
   });
 
-  // Right-rail (training panel) hint button + quick actions
+  // Right-rail (training panel) hint button + quick actions + checklist toggle
   document.getElementById('trainingPanel').addEventListener('click', (e) => {
     if (e.target.id === 'btnHint' && state.currentTicket) return requestHint(state.currentTicket);
+
+    // Manual checklist toggle
+    const chk = e.target.closest('.checklist-item');
+    if (chk && chk.dataset.check && state.currentTicket) {
+      const t = state.currentTicket;
+      t.manual_checks = t.manual_checks || [];
+      const k = chk.dataset.check;
+      const i = t.manual_checks.indexOf(k);
+      if (i >= 0) t.manual_checks.splice(i, 1); else t.manual_checks.push(k);
+      renderTrainingPanel(t);
+      return;
+    }
+
     const qa = e.target.closest('.qa-btn');
     if (qa && state.currentTicket && !qa.disabled) {
       const action = qa.dataset.action;
       if (!action) return;
-      // Light per-action payload so events make sense
       const t = state.currentTicket;
       const payload = action === 'check_related_incidents'
         ? { count: similarTickets(t).length + 1 }
@@ -1175,6 +1249,22 @@ async function waitForServer() {
           ? { parent: prompt('Parent incident number (e.g. INC0001000):', '') || '' }
           : {};
       if (action === 'link_parent' && !payload.parent) return;
+      // Visual feedback: collect_evidence highlights evidence panel; check_related_incidents flashes banner
+      if (action === 'collect_evidence') {
+        const ep = document.querySelector('.evidence-panel');
+        if (ep) { ep.scrollIntoView({ behavior: 'smooth', block: 'center' }); ep.classList.add('flash'); setTimeout(()=>ep.classList.remove('flash'), 1200); }
+        else showToast('No simulated evidence on this ticket.');
+      } else if (action === 'check_known_outage') {
+        const note = (t.tool_clues && (t.tool_clues.service_health || t.tool_clues.known_issue || t.tool_clues.change)) || 'No active outages or recent changes affect this CI.';
+        showToast('Known outage check: ' + note);
+      } else if (action === 'check_related_incidents') {
+        const n = similarTickets(t).length;
+        showToast(n ? `${n} related ticket(s) share this short description.` : 'No related incidents found in queue.');
+      } else if (action === 'validate_caller') {
+        showToast('Caller verified: ' + (t.caller_label || '(training user)'));
+      } else if (action === 'check_scope') {
+        showToast('Scope check logged. Capture: how many users, devices, locations.');
+      }
       return fireEvent(t, action, payload);
     }
   });

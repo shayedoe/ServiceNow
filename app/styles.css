@@ -620,3 +620,33 @@ button.sn-btn.danger:hover:not(:disabled) { background: #922b21; }
 .res-card ol { margin:6px 0 0 18px; padding:0; }
 .res-card code, .res-table code { background:#f3f5f7; padding:1px 5px; border-radius:3px; font-family:Consolas,monospace; font-size:12px; }
 .res-note { background:#fffae0; border-left:3px solid #f0c000; padding:8px 12px; margin:8px 0; }
+
+/* v3 polish */
+.checklist-item { cursor: pointer; user-select: none; }
+.checklist-item:hover { background: #eef6fb; border-color: var(--sn-blue); }
+.checklist-item .check { width:18px; height:18px; border:2px solid #c0c8cf; border-radius:3px; display:inline-flex; align-items:center; justify-content:center; font-weight:700; color:#fff; background:#fff; }
+.checklist-item.done .check { background: var(--sn-green, #2c8c00); border-color: var(--sn-green, #2c8c00); color:#fff; }
+.checklist-item.auto { font-style: italic; opacity: 0.92; }
+
+.evidence-panel.flash { animation: epflash 1.1s ease; }
+@keyframes epflash { 0% { box-shadow: 0 0 0 0 rgba(255,193,7,0.0); } 30% { box-shadow: 0 0 0 5px rgba(255,193,7,0.55); } 100% { box-shadow: 0 0 0 0 rgba(255,193,7,0.0); } }
+
+.res-when { font-size: 12px; color: var(--sn-muted, #6b7785); margin: 4px 0 6px; }
+
+.toast { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(10px); background: #2b3742; color: #fff; padding: 10px 16px; border-radius: 4px; font-size: 13px; max-width: 480px; box-shadow: 0 4px 14px rgba(0,0,0,0.25); opacity: 0; pointer-events: none; transition: opacity 0.18s, transform 0.18s; z-index: 9999; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* v3 polish */
+.checklist-item { cursor: pointer; user-select: none; }
+.checklist-item:hover { background: #eef6fb; border-color: var(--sn-blue); }
+.checklist-item .check { width:18px; height:18px; border:2px solid #c0c8cf; border-radius:3px; display:inline-flex; align-items:center; justify-content:center; font-weight:700; color:#fff; background:#fff; }
+.checklist-item.done .check { background: var(--sn-green, #2c8c00); border-color: var(--sn-green, #2c8c00); color:#fff; }
+.checklist-item.auto { font-style: italic; opacity: 0.92; }
+
+.evidence-panel.flash { animation: epflash 1.1s ease; }
+@keyframes epflash { 0% { box-shadow: 0 0 0 0 rgba(255,193,7,0.0); } 30% { box-shadow: 0 0 0 5px rgba(255,193,7,0.55); } 100% { box-shadow: 0 0 0 0 rgba(255,193,7,0.0); } }
+
+.res-when { font-size: 12px; color: var(--sn-muted, #6b7785); margin: 4px 0 6px; }
+
+.toast { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%) translateY(10px); background: #2b3742; color: #fff; padding: 10px 16px; border-radius: 4px; font-size: 13px; max-width: 480px; box-shadow: 0 4px 14px rgba(0,0,0,0.25); opacity: 0; pointer-events: none; transition: opacity 0.18s, transform 0.18s; z-index: 9999; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }

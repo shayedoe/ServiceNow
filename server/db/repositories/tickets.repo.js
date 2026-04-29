@@ -6,7 +6,9 @@ const COLS = [
   'correct_action','correct_group','expected_keywords','correct_steps',
   'required_events','response_deadline_minutes','partial_groups',
   'rationale','source','sn_sys_id','scenario_id','hints_used',
-  'notes','created_at','resolved_at','resolution'
+  'notes','caller_label','subcategory','business_service','cmdb_ci',
+  'tool_clues','learning_objectives',
+  'created_at','resolved_at','resolution'
 ];
 
 function insertTicket(t) {
@@ -29,6 +31,8 @@ function insertTicket(t) {
     ser(t.partial_groups, {}), t.rationale || '',
     t.source || 'offline', t.sn_sys_id || null, t.scenario_id || null,
     t.hints_used || 0, ser(t.notes, []),
+    t.caller_label || '', t.subcategory || '', t.business_service || '', t.cmdb_ci || '',
+    ser(t.tool_clues, {}), ser(t.learning_objectives, []),
     t.created_at || new Date().toISOString(),
     t.resolved_at || null, ser(t.resolution, null)
   );
@@ -74,6 +78,8 @@ function hydrate(row) {
     required_events: jp(row.required_events, []),
     partial_groups: jp(row.partial_groups, {}),
     notes: jp(row.notes, []),
+    tool_clues: jp(row.tool_clues, {}),
+    learning_objectives: jp(row.learning_objectives, []),
     resolution: jp(row.resolution, null)
   };
 }

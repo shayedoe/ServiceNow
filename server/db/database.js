@@ -20,6 +20,20 @@ function getDb() {
   db.pragma('foreign_keys = ON');
   const schema = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
   db.exec(schema);
+
+  // Lightweight migrations: add columns to existing DBs that pre-date them
+  const ensureCol = (table, col, decl) => {
+    const cols = db.prepare(`PRAGMA table_info(${table})`).all().map(r => r.name);
+    if (!cols.includes(col)) {
+      try { db.exec(`ALTER TABLE ${table} ADD COLUMN ${col} ${decl}`); } catch (e) { console.warn('migration', col, e.message); }
+    }
+  };
+  ensureCol('tickets', 'caller_label', "TEXT DEFAULT ''");
+  ensureCol('tickets', 'subcategory', "TEXT DEFAULT ''");
+  ensureCol('tickets', 'business_service', "TEXT DEFAULT ''");
+  ensureCol('tickets', 'cmdb_ci', "TEXT DEFAULT ''");
+  ensureCol('tickets', 'tool_clues', "TEXT DEFAULT '{}'");
+  ensureCol('tickets', 'learning_objectives', "TEXT DEFAULT '[]'");
   return db;
 }
 
