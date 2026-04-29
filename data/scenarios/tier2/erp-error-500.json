@@ -1,0 +1,38 @@
+{
+  "id": "erp_error_500",
+  "title": "ERP Application Returning HTTP 500 Errors",
+  "tier": 2,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] SAP Fiori returning HTTP 500 — approvals module unavailable",
+    "description": "Multiple finance team members report that the SAP Fiori approvals module is returning HTTP 500 Internal Server Error since approximately 09:15. The home dashboard loads but clicking any approval triggers the error. Month-end processing is today.",
+    "impact": "2",
+    "urgency": "2",
+    "category": "software",
+    "subcategory": "erp",
+    "caller_id": "Training User F"
+  },
+  "expected": {
+    "action": "escalate",
+    "assignment_group": "Application Support",
+    "impact": 2,
+    "urgency": 2,
+    "priority": 2,
+    "required_events": ["validate_caller", "check_related_incidents", "set_impact_urgency", "add_work_note", "assign_group"],
+    "required_note_keywords": ["500", "sap", "fiori", "application", "escalate", "month-end"]
+  },
+  "correct_steps": [
+    "Validate caller and document affected module (Fiori approvals) and time of onset",
+    "Check for other tickets — confirm multiple finance users affected",
+    "Set impact 2, urgency 2 given month-end business impact",
+    "Capture error details (HTTP 500, time, transaction code if available)",
+    "Escalate to Application Support team for SAP Basis investigation",
+    "Notify finance manager of ETA and workaround (email approvals if emergency)"
+  ],
+  "rationale": "HTTP 500 errors in SAP are application/server-side issues beyond Tier 2 scope. Application Support (SAP Basis) owns this. Month-end context raises urgency — must not sit in the queue.",
+  "response_deadline_minutes": 10,
+  "partial_groups": {
+    "Service Desk": 0.1,
+    "Infrastructure": 0.4,
+    "Database Administration": 0.4
+  }
+}

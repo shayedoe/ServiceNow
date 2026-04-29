@@ -1,0 +1,39 @@
+{
+  "id": "packet_loss_datacenter",
+  "title": "Intermittent Packet Loss — Core Datacenter Switch",
+  "tier": 3,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] 15-40% packet loss between DC-CORE-SW-01 and distribution layer",
+    "description": "Network monitoring (SolarWinds) has alerted on 15-40% packet loss between DC-CORE-SW-01 (Cisco Nexus 9K) and the distribution-layer switches. VoIP calls are dropping and VDI sessions are disconnecting intermittently across all tenants. The link has been degraded for 22 minutes. No maintenance window is active.",
+    "impact": "1",
+    "urgency": "1",
+    "category": "network",
+    "subcategory": "infrastructure",
+    "caller_id": "Training User I"
+  },
+  "expected": {
+    "action": "escalate",
+    "assignment_group": "Network Operations",
+    "impact": 1,
+    "urgency": 1,
+    "priority": 1,
+    "required_events": ["validate_caller", "check_related_incidents", "set_impact_urgency", "add_work_note", "link_parent", "assign_group"],
+    "required_note_keywords": ["packet loss", "nexus", "core switch", "solarwinds", "voip", "vdi", "network", "escalate"]
+  },
+  "correct_steps": [
+    "Acknowledge the SolarWinds alert and validate with the reporting caller",
+    "Review SNMP trap logs and interface error counters on DC-CORE-SW-01",
+    "Set Impact 1 / Urgency 1 — all tenants and VoIP affected",
+    "Check for related VoIP, VDI, and application tickets — link as children",
+    "Escalate to Network Operations (NOC) for immediate switch investigation",
+    "Do not reboot the core switch without NOC lead approval — risk of full outage",
+    "Open a major incident record and notify IT management and comms team"
+  ],
+  "rationale": "Core datacenter switch degradation is a Tier 3 / NOC incident. 15-40% packet loss on the core affects every connected system. Escalation with correct Priority 1 and a major incident declaration is the correct response.",
+  "response_deadline_minutes": 5,
+  "partial_groups": {
+    "Infrastructure": 0.6,
+    "Server Operations": 0.3,
+    "Service Desk": 0.1
+  }
+}

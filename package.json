@@ -30,8 +30,9 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "express": "^4.19.2",
-    "cors": "^2.8.5"
+    "better-sqlite3": "^12.9.0",
+    "cors": "^2.8.5",
+    "express": "^4.19.2"
   },
   "devDependencies": {
     "electron": "^31.0.0",

@@ -139,3 +139,15 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 .summary-table th { text-align:left; padding: 6px 8px; background:#f1f5f9; border-bottom:1px solid #cbd5e1; }
 .summary-table td { padding: 6px 8px; border-bottom: 1px solid #f1f5f9; }
 .bad-inline { color:#b91c1c; font-size:11px; }
+
+/* Action Panel + Event Log */
+.action-panel { display:flex; flex-wrap:wrap; gap:6px; margin:6px 0 14px; }
+.action-btn { background:#eef2ff; border:1px solid #c7d2fe; color:#1e3a8a; padding:6px 10px; border-radius:6px; font-size:12px; cursor:pointer; }
+.action-btn:hover { background:#e0e7ff; }
+.action-btn.done { background:#dcfce7; border-color:#86efac; color:#166534; }
+.event-log { background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:8px; max-height:240px; overflow:auto; font-size:12px; }
+.event-row { display:flex; gap:10px; padding:3px 0; border-bottom:1px dashed #e2e8f0; }
+.event-row:last-child { border-bottom:none; }
+.event-time { color:#64748b; font-family:monospace; min-width:72px; }
+.event-action { font-weight:600; color:#0f172a; min-width:160px; }
+.event-payload { color:#475569; font-style:italic; flex:1; word-break:break-word; }

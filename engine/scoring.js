@@ -68,6 +68,20 @@ function buildRubric(ticket, opts = {}) {
     });
   }
 
+  if (ticket.required_events && ticket.required_events.length) {
+    for (const ev of ticket.required_events) {
+      rules.push({
+        key: ev,
+        label: ev.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
+        weight: 5,
+        type: 'eventExists',
+        event: ev,
+        why_correct: `You performed the required "${ev}" action.`,
+        why_wrong: `"${ev}" is required for this ticket type.`
+      });
+    }
+  }
+
   if (ticket.response_deadline_minutes && opts.opened_at && opts.submitted_at) {
     rules.push({
       key: '__timing',
@@ -103,7 +117,8 @@ function scoreTicket(ticket, userInput, allTickets, opts = {}) {
     note: [
       ...(ticket.notes || []).map(n => n.text || ''),
       userInput.note || ''
-    ].join(' \n ')
+    ].join(' \n '),
+    _events: opts.events || []
   };
 
   const graded = gradeAttempt(rubric, attempt);

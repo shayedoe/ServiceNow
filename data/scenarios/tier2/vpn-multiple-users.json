@@ -1,0 +1,38 @@
+{
+  "id": "vpn_multiple_users",
+  "title": "VPN Dropping Multiple Users — Possible Outage",
+  "tier": 2,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] Multiple users disconnected from VPN — FortiClient session drops after ~10 minutes",
+    "description": "Three separate users in different departments opened tickets within 20 minutes reporting that their FortiClient VPN drops after approximately 10 minutes of use. IT has not pushed any VPN policy changes today. Users are on different physical sites.",
+    "impact": "2",
+    "urgency": "2",
+    "category": "network",
+    "subcategory": "vpn",
+    "caller_id": "Training User D"
+  },
+  "expected": {
+    "action": "escalate",
+    "assignment_group": "Network Operations",
+    "impact": 2,
+    "urgency": 2,
+    "priority": 2,
+    "required_events": ["validate_caller", "check_related_incidents", "set_impact_urgency", "add_work_note", "assign_group"],
+    "required_note_keywords": ["multiple users", "pattern", "fortigate", "escalate", "network"]
+  },
+  "correct_steps": [
+    "Validate caller and confirm VPN client version and OS",
+    "Search for related tickets — confirm ≥3 users affected across different sites",
+    "Upgrade impact to 2 and urgency to 2 due to multi-user, multi-site pattern",
+    "Document the pattern in work notes",
+    "Escalate to Network Operations for FortiGate gateway investigation",
+    "Notify users that issue is being investigated and provide estimated ETA"
+  ],
+  "rationale": "A VPN session drop affecting multiple users across different physical sites is almost certainly a gateway or policy issue, not a local endpoint problem. It exceeds Tier 1 scope and requires Network Operations.",
+  "response_deadline_minutes": 10,
+  "partial_groups": {
+    "Service Desk": 0.2,
+    "Infrastructure": 0.6,
+    "Security Operations": 0.4
+  }
+}

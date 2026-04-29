@@ -1,26 +1,16 @@
 /**
  * Rubric DSL — weighted, partial-credit grader.
  *
- * A rubric is { rules: [Rule], totalWeight?: number }
- *   Rule: {
- *     key: string,             // e.g. 'action'
- *     label: string,           // human label
- *     weight: number,          // contribution to score
- *     type: 'exact' | 'oneOff' | 'keywords' | 'timing',
- *     expected: any,
- *     partial?: object,        // for 'exact': { altValue: fraction }
- *     why_correct?: string,
- *     why_wrong?: string,
- *     // type=keywords specifics:
- *     keywords?: string[],
- *     // type=timing specifics:
- *     deadline_minutes?: number,
- *     opened_at?: string|number,
- *     submitted_at?: string|number
- *   }
- *
- * Each rule, when graded, returns { key, label, weight, earned, fraction, ok, message, why }.
+ * Rule types:
+ *   exact       — string equality with optional partial{} map
+ *   oneOff      — numeric, ±1 = 50% credit
+ *   keywords    — keyword coverage: ≥80%=full, ≥50%=60%, >0%=20%
+ *   timing      — response time vs deadline
+ *   eventExists — was a specific action_type in the event timeline?
+ *   eventBefore — did action A occur before action B?
  */
+
+const { eventExists, eventBefore } = require('./checklist');
 
 function gradeRule(rule, attempt) {
   const w = Number(rule.weight) || 0;
@@ -78,6 +68,26 @@ function gradeRule(rule, attempt) {
       `Notes cover ${hit.length}/${kw.length} expected steps${missed.length ? ` (missing: ${missed.join(', ')})` : ''}.`,
       ok ? 'Your work notes document the key actions a reviewer would expect.'
          : 'Document the actions you took in work notes so the next agent and the reviewer can follow your work.');
+  }
+
+  if (rule.type === 'eventExists') {
+    const events = attempt._events || [];
+    const found = eventExists(events, rule.event);
+    return res(rule, found ? 1 : 0, found,
+      found
+        ? `Action "${rule.event}" was performed.`
+        : `Required action "${rule.event}" was not performed.`,
+      found ? rule.why_correct : (rule.why_wrong || `You must perform "${rule.event}" before resolving.`));
+  }
+
+  if (rule.type === 'eventBefore') {
+    const events = attempt._events || [];
+    const ok = eventBefore(events, rule.before, rule.after);
+    return res(rule, ok ? 1 : 0, ok,
+      ok
+        ? `"${rule.before}" correctly occurred before "${rule.after}".`
+        : `"${rule.before}" did not occur before "${rule.after}".`,
+      ok ? rule.why_correct : (rule.why_wrong || `"${rule.before}" must be performed before "${rule.after}".`));
   }
 
   if (rule.type === 'timing') {

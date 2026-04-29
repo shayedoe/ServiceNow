@@ -2,7 +2,7 @@ const { app, BrowserWindow, safeStorage } = require('electron');
 const path = require('path');
 const startServer = require('./server/server');
 const sn = require('./server/servicenow');
-const attempts = require('./server/attempts');
+const db = require('./server/db/database');
 
 let mainWindow;
 let serverInstance;
@@ -24,8 +24,9 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-  sn.setUserDataDir(app.getPath('userData'));
-  attempts.setUserDataDir(app.getPath('userData'));
+  const userData = app.getPath('userData');
+  sn.setUserDataDir(userData);
+  db.setUserDataDir(userData);
   // Provide OS-backed encryption for credentials at rest (Windows DPAPI / mac Keychain).
   if (safeStorage && safeStorage.isEncryptionAvailable()) {
     sn.setCrypto({

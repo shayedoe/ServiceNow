@@ -1,13 +1,30 @@
 const BASE = (window.api && window.api.baseUrl) || 'http://localhost:3017';
 
 const state = {
+  session_id: null,
   tickets: [],
   groups: [],
   currentIndex: 0,
   shiftScore: { resolved: 0, correct: 0, total: 0 },
   finished: false,
-  totalQuestions: 0
+  totalQuestions: 0,
+  source: 'offline'
 };
+
+const ACTION_LABELS = {
+  validate_caller: 'Validate Caller',
+  check_scope: 'Check Scope',
+  check_related_incidents: 'Check Related Incidents',
+  set_impact_urgency: 'Set Impact/Urgency',
+  assign_group: 'Assign Group',
+  add_work_note: 'Add Work Note',
+  add_comment: 'Add Caller Comment',
+  link_parent: 'Link Parent Incident',
+  hint_used: 'Hint Used',
+  escalate: 'Escalate',
+  resolve: 'Resolve'
+};
+function labelFor(at) { return ACTION_LABELS[at] || at.replace(/_/g, ' '); }
 
 const $ = (sel) => document.querySelector(sel);
 const shellEl = () => $('#examShell');
@@ -145,11 +162,36 @@ function renderShell() {
         <div class="readonly">P${t.priority}</div>
       </div>
 
+      <div class="field">
+        <label>Impact</label>
+        <select id="fImpact" ${isResolved?'disabled':''}>
+          <option value="1" ${Number(t.impact)===1?'selected':''}>1 - High</option>
+          <option value="2" ${Number(t.impact)===2?'selected':''}>2 - Medium</option>
+          <option value="3" ${Number(t.impact)===3||!t.impact?'selected':''}>3 - Low</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Urgency</label>
+        <select id="fUrgency" ${isResolved?'disabled':''}>
+          <option value="1" ${Number(t.urgency)===1?'selected':''}>1 - High</option>
+          <option value="2" ${Number(t.urgency)===2?'selected':''}>2 - Medium</option>
+          <option value="3" ${Number(t.urgency)===3||!t.urgency?'selected':''}>3 - Low</option>
+        </select>
+      </div>
+
       <div class="field full">
         <label>Work Notes (document your steps)</label>
         <textarea id="fNote" ${isResolved?'disabled':''} placeholder="Describe what you did or would do..."></textarea>
       </div>
+
+      <div class="field full">
+        <label>Caller Comment (visible to caller)</label>
+        <textarea id="fComment" ${isResolved?'disabled':''} placeholder="Optional message to send to the caller..."></textarea>
+      </div>
     </div>
+
+    ${renderActionPanel(t, isResolved)}
 
     <div class="toolbar">
       <button id="btnHint" class="hint-btn" ${isResolved||(t.hints_used||0)>=3?'disabled':''}>${(t.hints_used||0)>=3?'Hints exhausted':`Get Hint${(t.hints_used||0)>0?` (${t.hints_used} used, -${(t.hints_used||0)*5}%)`:''}`}</button>
@@ -162,6 +204,9 @@ function renderShell() {
     <div class="section-title">Work Notes</div>
     <div class="notes">${notesHtml}</div>
 
+    <div class="section-title">Action Timeline</div>
+    <div id="eventLog" class="event-log">${renderEventLog(t.events || [])}</div>
+
     ${resultHtml}
   `;
 
@@ -169,10 +214,96 @@ function renderShell() {
     $('#btnResolve').addEventListener('click', () => submitResolution('resolve'));
     $('#btnEscalate').addEventListener('click', () => submitResolution('escalate'));
     if ((t.hints_used||0) < 3) $('#btnHint').addEventListener('click', requestHint);
+    bindActionPanel(t);
   } else {
     const next = $('#btnNext');
     if (next) next.addEventListener('click', advanceQuestion);
   }
+}
+
+function renderActionPanel(t, isResolved) {
+  if (isResolved) return '';
+  const performed = new Set((t.events || []).map(e => e.action_type));
+  const btn = (action, label) => {
+    const did = performed.has(action);
+    return `<button class="action-btn ${did?'done':''}" data-action="${action}" title="${did?'Already performed':label}">${did?'\u2713 ':''}${label}</button>`;
+  };
+  return `
+    <div class="section-title">Investigation Actions</div>
+    <div class="action-panel">
+      ${btn('validate_caller', 'Validate Caller')}
+      ${btn('check_scope', 'Check Scope')}
+      ${btn('check_related_incidents', 'Check Related Incidents')}
+      ${btn('set_impact_urgency', 'Set Impact/Urgency')}
+      ${btn('assign_group', 'Assign Group')}
+      ${btn('add_work_note', 'Add Work Note')}
+      ${btn('add_comment', 'Send Caller Comment')}
+      ${btn('link_parent', 'Link Parent Incident')}
+    </div>
+  `;
+}
+
+function bindActionPanel(t) {
+  document.querySelectorAll('.action-panel .action-btn').forEach(b => {
+    b.addEventListener('click', () => fireAction(t, b.dataset.action));
+  });
+}
+
+async function fireAction(t, action) {
+  let payload = {};
+  if (action === 'set_impact_urgency') {
+    payload = { impact: $('#fImpact').value, urgency: $('#fUrgency').value };
+  } else if (action === 'assign_group') {
+    const g = $('#fGroup').value;
+    if (!g) return alert('Select an assignment group first.');
+    payload = { group: g };
+  } else if (action === 'add_work_note') {
+    const text = ($('#fNote').value || '').trim();
+    if (!text) return alert('Type a work note first.');
+    payload = { text };
+    $('#fNote').value = '';
+  } else if (action === 'add_comment') {
+    const text = ($('#fComment').value || '').trim();
+    if (!text) return alert('Type a caller comment first.');
+    payload = { text };
+    $('#fComment').value = '';
+  } else if (action === 'link_parent') {
+    const parent = prompt('Parent incident number to link:');
+    if (!parent) return;
+    payload = { parent };
+  }
+  try {
+    const data = await apiCall(`/api/tickets/${t.number}/event`, {
+      method: 'POST',
+      body: JSON.stringify({ action_type: action, payload })
+    });
+    t.events = data.events;
+    // Refresh ticket fields after server-side side effects
+    const fresh = await apiCall(`/api/tickets/${t.number}`);
+    Object.assign(t, fresh, { events: data.events });
+    renderShell();
+  } catch (err) {
+    alert('Action failed: ' + err.message);
+  }
+}
+
+function renderEventLog(events) {
+  if (!events || !events.length) return '<div class="empty">No actions recorded yet.</div>';
+  return events.map(e => {
+    const at = e.at ? new Date(e.at).toLocaleTimeString() : '';
+    const summary = summarizePayload(e.action_type, e.payload);
+    return `<div class="event-row"><span class="event-time">${at}</span><span class="event-action">${labelFor(e.action_type)}</span>${summary?`<span class="event-payload">${escapeHtml(summary)}</span>`:''}</div>`;
+  }).join('');
+}
+
+function summarizePayload(action, p) {
+  if (!p) return '';
+  if (action === 'set_impact_urgency') return `I${p.impact} / U${p.urgency}`;
+  if (action === 'assign_group') return p.group || '';
+  if (action === 'add_work_note' || action === 'add_comment') return (p.text || '').slice(0, 80);
+  if (action === 'link_parent') return p.parent || '';
+  if (action === 'hint_used') return `level ${p.level}`;
+  return '';
 }
 
 function renderHintsPanel(t) {
@@ -206,7 +337,7 @@ function readForm() {
   return {
     assigned_group: $('#fGroup').value || null,
     priority: Number($('#fPriority').value),
-    note: $('#fNote').value
+    note: ($('#fNote') && $('#fNote').value) || ''
   };
 }
 
@@ -225,6 +356,7 @@ async function submitResolution(action) {
       })
     });
     Object.assign(t, data.ticket);
+    t.events = data.events || t.events || [];
     state.shiftScore = data.shiftScore;
     updateScore();
     renderShell();
@@ -233,9 +365,10 @@ async function submitResolution(action) {
   }
 }
 
-function advanceQuestion() {
+async function advanceQuestion() {
   if (state.currentIndex < state.tickets.length - 1) {
     state.currentIndex += 1;
+    await refreshCurrentTicketEvents();
     renderShell();
   } else {
     finishShift();
@@ -244,7 +377,7 @@ function advanceQuestion() {
 
 async function finishShift() {
   try {
-    const summary = await apiCall('/api/shift/summary');
+    const summary = await apiCall('/api/sessions/current/summary');
     state.finished = true;
     renderSummary(summary);
   } catch (err) {
@@ -325,6 +458,8 @@ async function startShift() {
   state.currentIndex = 0;
   try {
     const live = document.getElementById('liveMode').checked;
+    const authoredEl = document.getElementById('authoredMode');
+    const authored = authoredEl && authoredEl.checked;
     let data;
     if (live) {
       const mode = document.getElementById('snMode').value || 'closed';
@@ -332,23 +467,37 @@ async function startShift() {
         method: 'POST',
         body: JSON.stringify({ mode, limit: 10 })
       });
+      state.source = 'live';
     } else {
       const tier = Number(document.getElementById('tierSelect').value) || 1;
-      data = await apiCall('/api/shift/start', {
+      const source = authored ? 'authored' : 'offline';
+      data = await apiCall('/api/sessions/start', {
         method: 'POST',
-        body: JSON.stringify({ tier })
+        body: JSON.stringify({ tier, source, mode: 'exam' })
       });
+      state.source = source;
     }
-    state.tickets = data.tickets;
-    state.shiftScore = data.shiftScore;
-    state.totalQuestions = data.total_questions || data.tickets.length;
+    state.session_id = data.session_id || null;
+    state.tickets = (data.tickets || []).map(t => ({ ...t, events: t.events || [] }));
+    state.shiftScore = data.shiftScore || { resolved: 0, correct: 0, total: 0 };
+    state.totalQuestions = data.total_questions || state.tickets.length;
     await loadGroups();
     updateScore();
+    await refreshCurrentTicketEvents();
     renderShell();
   } catch (e) {
     console.error('startShift error:', e);
     shellEl().innerHTML = `<div class="empty large">Error starting shift: ${escapeHtml(e.message)}</div>`;
   }
+}
+
+async function refreshCurrentTicketEvents() {
+  const t = state.tickets[state.currentIndex];
+  if (!t) return;
+  try {
+    const fresh = await apiCall(`/api/tickets/${t.number}`);
+    Object.assign(t, fresh);
+  } catch { /* ignore */ }
 }
 
 // ---- Settings modal ----

@@ -45,14 +45,14 @@ function saveConfig(next) {
   const password = String(next.password || '');
   const out = { instance, username };
   if (password) {
-    if (crypto) out.password_enc = crypto.encrypt(password);
-    else out.password = password; // last-resort fallback
+    if (!crypto) throw new Error('OS encryption unavailable. Ensure the app is running inside Electron with safeStorage enabled, or set credentials via environment variable.');
+    out.password_enc = crypto.encrypt(password);
   } else {
     // preserve existing
     const prev = loadConfig();
     if (prev.password) {
-      if (crypto) out.password_enc = crypto.encrypt(prev.password);
-      else out.password = prev.password;
+      if (!crypto) throw new Error('OS encryption unavailable. Cannot re-encrypt existing password.');
+      out.password_enc = crypto.encrypt(prev.password);
     }
   }
   fs.writeFileSync(configPath(), JSON.stringify(out, null, 2), 'utf8');
