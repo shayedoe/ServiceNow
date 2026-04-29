@@ -1,0 +1,306 @@
+{
+  "categories": {
+    "network": {
+      "assignment_group": "Network Operations",
+      "templates": [
+        {
+          "tier": 1,
+          "short_description": "Cannot connect to office Wi-Fi",
+          "description": "User reports being unable to connect to the corporate Wi-Fi from their laptop on the {floor} floor.",
+          "correct_action": "resolve",
+          "correct_steps": [
+            "Verify SSID and credentials with user",
+            "Forget and re-add the Wi-Fi profile",
+            "Reset the network adapter",
+            "Reconnect and confirm connectivity"
+          ],
+          "expected_keywords": ["ssid", "wi-fi", "adapter", "reconnect"],
+          "rationale": "Single-user Wi-Fi failure is a standard Tier 1 fix: re-add profile and reset adapter. No infrastructure change is required.",
+          "priority": 3,
+          "response_deadline_minutes": 15,
+          "partial_groups": { "Service Desk": 0.5 },
+          "outage_capable": true,
+          "outage_short_description": "Wi-Fi outage on {floor} floor",
+          "outage_description": "Multiple users on the {floor} floor report total Wi-Fi loss.",
+          "outage_correct_action": "escalate",
+          "outage_correct_group": "Network Operations - Tier 2"
+        },
+        {
+          "tier": 1,
+          "short_description": "VPN disconnects every few minutes",
+          "description": "Remote user states the corporate VPN drops repeatedly during the day.",
+          "correct_action": "resolve",
+          "correct_steps": [
+            "Confirm VPN client version is current",
+            "Re-import the VPN profile",
+            "Test connection on a wired link to rule out Wi-Fi",
+            "Document stability before closing"
+          ],
+          "expected_keywords": ["vpn", "client", "profile", "stability"],
+          "rationale": "Intermittent VPN drops for one user are usually a stale client/profile. Tier 1 reinstall + retest before involving Network Ops.",
+          "priority": 3
+        },
+        {
+          "tier": 2,
+          "short_description": "Slow internet in conference room",
+          "description": "Users report extremely slow internet in the main conference room during meetings.",
+          "correct_action": "escalate",
+          "correct_group": "Network Operations - Tier 2",
+          "correct_steps": [
+            "Run a speed test from a room device",
+            "Capture results, time, and SSID/AP MAC",
+            "Open Tier 2 ticket with evidence and AP name"
+          ],
+          "expected_keywords": ["speed test", "access point", "evidence", "tier 2"],
+          "rationale": "Localized slowness affecting many users points to AP saturation or uplink — Tier 2 must look at controller stats. Tier 1 collects evidence and hands off.",
+          "priority": 4,
+          "response_deadline_minutes": 30,
+          "partial_groups": { "Network Engineering - Tier 3": 0.5 }
+        },
+        {
+          "tier": 3,
+          "short_description": "Intermittent packet loss to data center",
+          "description": "Application teams report 2-5% packet loss to the primary DC during peak hours; affects multiple business units.",
+          "correct_action": "escalate",
+          "correct_group": "Network Engineering - Tier 3",
+          "correct_steps": [
+            "Collect MTR/traceroute from at least 3 source segments",
+            "Pull interface error counters from edge switches",
+            "Correlate with change management for any recent routing changes",
+            "Open P2 with Tier 3 referencing CR ticket numbers"
+          ],
+          "expected_keywords": ["mtr", "traceroute", "interface counters", "change management", "p2"],
+          "rationale": "Cross-segment packet loss is a routing/transit issue. Tier 3 needs MTRs and interface stats from multiple vantage points before they can act.",
+          "priority": 2,
+          "response_deadline_minutes": 20,
+          "partial_groups": { "Network Operations - Tier 2": 0.5 }
+        }
+      ]
+    },
+    "hardware": {
+      "assignment_group": "Desktop Support",
+      "templates": [
+        {
+          "tier": 1,
+          "short_description": "Laptop will not power on",
+          "description": "User states their company laptop is unresponsive after a weekend.",
+          "correct_action": "resolve",
+          "correct_steps": [
+            "Verify the power adapter and outlet",
+            "Perform a 30-second hard reset (battery drain)",
+            "Boot to BIOS to confirm hardware health",
+            "Document boot result"
+          ],
+          "expected_keywords": ["power adapter", "hard reset", "bios"],
+          "rationale": "Unresponsive laptop is a textbook Tier 1 walk-through: power source, hard reset, BIOS check before any hardware swap.",
+          "priority": 2
+        },
+        {
+          "tier": 1,
+          "short_description": "Monitor flickering",
+          "description": "External monitor flickers intermittently when the user moves the cable.",
+          "correct_action": "resolve",
+          "correct_steps": [
+            "Reseat the display cable",
+            "Swap to a known-good cable",
+            "Test on a second port",
+            "Replace monitor only if cable swaps fail"
+          ],
+          "expected_keywords": ["cable", "reseat", "swap", "port"],
+          "rationale": "Flicker that follows cable movement is almost always a cable/connector issue. Cheap swap first, replace last.",
+          "priority": 4
+        },
+        {
+          "tier": 1,
+          "short_description": "Printer not printing",
+          "description": "Department printer is online but jobs sit in the queue.",
+          "correct_action": "resolve",
+          "correct_steps": [
+            "Clear the print queue on the user's machine",
+            "Restart the print spooler service",
+            "Send a test page",
+            "Confirm with user"
+          ],
+          "expected_keywords": ["queue", "spooler", "test page"],
+          "rationale": "Stuck queue + online printer = client-side spooler. Tier 1 fix in under 5 minutes.",
+          "priority": 4,
+          "outage_capable": true,
+          "outage_short_description": "Multiple printers offline",
+          "outage_description": "Several department printers are offline and not accepting print jobs.",
+          "outage_correct_action": "escalate",
+          "outage_correct_group": "Desktop Support - Tier 2"
+        },
+        {
+          "tier": 2,
+          "short_description": "Docking station not detecting external displays",
+          "description": "User's Thunderbolt dock will not light up either external monitor after a recent OS update.",
+          "correct_action": "resolve",
+          "correct_group": "Desktop Support",
+          "correct_steps": [
+            "Update the dock firmware to the latest vendor release",
+            "Reinstall Thunderbolt and graphics drivers",
+            "Power-cycle the dock (unplug 30s)",
+            "Verify both displays after reboot"
+          ],
+          "expected_keywords": ["firmware", "thunderbolt", "driver", "power-cycle"],
+          "rationale": "Post-update dock failures usually need vendor firmware + driver refresh. Beyond Tier 1's standard image, but still resolvable at Tier 2.",
+          "priority": 3
+        },
+        {
+          "tier": 3,
+          "short_description": "Recurring blue screen on engineering workstations",
+          "description": "Three engineering workstations have BSOD'd with DPC_WATCHDOG_VIOLATION in the past 48 hours after a GPU driver push.",
+          "correct_action": "escalate",
+          "correct_group": "Endpoint Engineering",
+          "correct_steps": [
+            "Collect minidumps from all affected machines",
+            "Identify common driver versions and recent SCCM packages",
+            "Roll back the GPU driver on one machine as a controlled test",
+            "Open a P2 with Endpoint Engineering including dump analysis"
+          ],
+          "expected_keywords": ["minidump", "dpc_watchdog", "rollback", "sccm", "p2"],
+          "rationale": "A reproducible BSOD code across multiple machines after a driver push is a fleet-level issue. Tier 3 owns the package; Tier 1/2 collects evidence.",
+          "priority": 2
+        }
+      ]
+    },
+    "access": {
+      "assignment_group": "Identity & Access Management",
+      "templates": [
+        {
+          "tier": 1,
+          "short_description": "Password reset required",
+          "description": "User is locked out of their corporate account after multiple failed attempts.",
+          "correct_action": "resolve",
+          "correct_steps": [
+            "Verify identity using two pieces of information",
+            "Reset password in Active Directory",
+            "Force change at next login",
+            "Confirm successful login with user"
+          ],
+          "expected_keywords": ["verify identity", "active directory", "force change", "login"],
+          "rationale": "Identity verification + AD reset is the canonical Tier 1 task. Always force change at next login.",
+          "priority": 3
+        },
+        {
+          "tier": 1,
+          "short_description": "Cannot access shared drive",
+          "description": "User cannot open the Finance shared drive after a recent department transfer.",
+          "correct_action": "resolve",
+          "correct_steps": [
+            "Confirm the user's current department in HR system",
+            "Check current AD group membership",
+            "Add user to the correct AD security group",
+            "Have user sign out and back in, confirm access"
+          ],
+          "expected_keywords": ["ad group", "membership", "sign out", "confirm"],
+          "rationale": "Department transfers commonly miss group migration. Tier 1 verifies + adds to the correct group.",
+          "priority": 3
+        },
+        {
+          "tier": 2,
+          "short_description": "MFA device lost",
+          "description": "User reports losing their MFA hardware token while traveling.",
+          "correct_action": "escalate",
+          "correct_group": "Security Operations",
+          "correct_steps": [
+            "Verify identity via a secondary channel (manager callback)",
+            "Place a hold on the account",
+            "Open a Sec Ops ticket for token revocation and reissue"
+          ],
+          "expected_keywords": ["secondary channel", "manager", "revocation", "sec ops"],
+          "rationale": "A lost MFA token is a security event, not a self-service reset. Identity is verified out-of-band; Sec Ops revokes and reissues.",
+          "priority": 2
+        },
+        {
+          "tier": 3,
+          "short_description": "Service account authentication failures across multiple apps",
+          "description": "An application service account is failing Kerberos auth against several internal apps after a domain controller change.",
+          "correct_action": "escalate",
+          "correct_group": "Identity Engineering",
+          "correct_steps": [
+            "Collect klist and event log entries from app servers",
+            "Confirm SPN registration on the service account",
+            "Identify recent DC or schema changes via change management",
+            "Escalate to Identity Engineering with evidence and timeline"
+          ],
+          "expected_keywords": ["kerberos", "spn", "domain controller", "klist", "identity engineering"],
+          "rationale": "Cross-app Kerberos failure tied to a DC change is an infrastructure issue. Tier 3 (Identity Engineering) owns SPN/DC; lower tiers gather evidence.",
+          "priority": 1
+        }
+      ]
+    },
+    "software": {
+      "assignment_group": "Application Support",
+      "templates": [
+        {
+          "tier": 1,
+          "short_description": "Outlook keeps crashing",
+          "description": "Outlook closes unexpectedly after the user opens certain emails.",
+          "correct_action": "resolve",
+          "correct_steps": [
+            "Start Outlook in safe mode",
+            "Disable add-ins one at a time",
+            "Recreate the mail profile if needed",
+            "Confirm stability with user"
+          ],
+          "expected_keywords": ["safe mode", "add-in", "profile", "stability"],
+          "rationale": "Outlook crashes are typically add-in or profile corruption. Standard Tier 1 isolation.",
+          "priority": 3
+        },
+        {
+          "tier": 1,
+          "short_description": "Need software install",
+          "description": "User requests installation of approved design software on their workstation.",
+          "correct_action": "resolve",
+          "correct_steps": [
+            "Verify license entitlement and manager approval",
+            "Push the package via SCCM/Intune",
+            "Confirm install and license activation with user"
+          ],
+          "expected_keywords": ["license", "sccm", "approval", "confirm"],
+          "rationale": "Approved-software install is a Tier 1 fulfillment task once entitlement is verified.",
+          "priority": 5
+        },
+        {
+          "tier": 2,
+          "short_description": "ERP application throws error 500",
+          "description": "User cannot submit purchase orders, gets HTTP 500 in the ERP web client.",
+          "correct_action": "escalate",
+          "correct_group": "ERP Application Team",
+          "correct_steps": [
+            "Capture an error screenshot and HAR file",
+            "Note exact time and user ID for log correlation",
+            "Confirm scope (other users, other modules)",
+            "Escalate to ERP Application Team with evidence"
+          ],
+          "expected_keywords": ["screenshot", "har", "timestamp", "scope", "erp"],
+          "rationale": "HTTP 500 means a server-side failure — Tier 1/2 cannot fix it. The job is to collect evidence so the app team can diagnose.",
+          "priority": 2,
+          "outage_capable": true,
+          "outage_short_description": "ERP application unavailable",
+          "outage_description": "Multiple users cannot access the ERP application; error 500 on submit.",
+          "outage_correct_action": "escalate",
+          "outage_correct_group": "ERP Application Team"
+        },
+        {
+          "tier": 3,
+          "short_description": "Database query timeouts in production reporting app",
+          "description": "Reporting app is timing out on queries that ran in seconds last week. Affects month-end close.",
+          "correct_action": "escalate",
+          "correct_group": "Database Administration",
+          "correct_steps": [
+            "Capture exact query, timeout value, and start time",
+            "Pull execution plan and recent index/stats changes",
+            "Check for blocking sessions and tempdb pressure",
+            "Open a P1 to DBA with evidence; loop in app team"
+          ],
+          "expected_keywords": ["execution plan", "blocking", "index", "tempdb", "p1", "dba"],
+          "rationale": "Sudden timeout regression is a database performance issue (stats, plan, blocking). DBAs own the tuning; everyone else collects evidence.",
+          "priority": 1
+        }
+      ]
+    }
+  },
+  "floors": ["1st", "2nd", "3rd", "4th"]
+}

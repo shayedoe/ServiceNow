@@ -1,0 +1,40 @@
+{
+  "name": "helpdesk-simulator",
+  "version": "1.0.0",
+  "description": "Local desktop Help Desk Simulator that mimics ServiceNow incident workflows",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "server": "node server/server.js",
+    "build": "electron-builder --win --x64"
+  },
+  "build": {
+    "appId": "com.local.helpdesksim",
+    "productName": "HelpDeskSimulator",
+    "files": [
+      "main.js",
+      "preload.js",
+      "app/**/*",
+      "server/**/*",
+      "engine/**/*",
+      "data/**/*",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis"
+    }
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.19.2",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  }
+}

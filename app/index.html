@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Help Desk Simulator</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Help Desk Simulator</div>
+    <div class="actions">
+      <span id="shiftScore" class="score">Shift: 0/0 correct (0 resolved)</span>
+      <label for="tierSelect" style="font-size:12px;color:#cbd5e1;">Difficulty</label>
+      <select id="tierSelect" class="tier-select">
+        <option value="1">Tier 1 (basic)</option>
+        <option value="2">Tier 2 (intermediate)</option>
+        <option value="3">Tier 3 (advanced)</option>
+      </select>
+      <label class="live-toggle"><input type="checkbox" id="liveMode" /> Live ServiceNow</label>
+      <button id="settingsBtn" title="ServiceNow settings">&#9881;</button>
+      <button id="startShiftBtn" class="primary">Start Shift</button>
+    </div>
+  </header>
+
+  <div id="settingsModal" class="modal hidden">
+    <div class="modal-card">
+      <h3>ServiceNow Connection</h3>
+      <div class="field"><label>Instance URL</label>
+        <input id="snInstance" placeholder="https://devXXXXXX.service-now.com" />
+      </div>
+      <div class="field"><label>Username</label>
+        <input id="snUser" placeholder="admin" />
+      </div>
+      <div class="field"><label>Password</label>
+        <input id="snPass" type="password" placeholder="(stored locally only)" />
+      </div>
+      <div class="field"><label>Mode</label>
+        <select id="snMode">
+          <option value="closed">Closed/Resolved (training with answer key)</option>
+          <option value="open">Open / Active</option>
+        </select>
+      </div>
+      <div id="snStatus" class="sn-status"></div>
+      <div class="modal-actions">
+        <button id="snTestBtn">Test Connection</button>
+        <button id="snSaveBtn" class="primary">Save</button>
+        <button id="snCloseBtn">Close</button>
+      </div>
+      <p class="muted">Password is encrypted with the OS keystore (Windows DPAPI / macOS Keychain) when available. Use a Personal Developer Instance only.</p>
+    </div>
+  </div>
+
+  <main class="layout exam-layout">
+    <section id="examShell" class="exam-shell">
+      <div class="empty large">Click "Start Shift" to begin a 10-question exam.</div>
+    </section>
+  </main>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
