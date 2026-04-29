@@ -1,0 +1,42 @@
+{
+  "id": "t2_exec_payroll_deadline",
+  "title": "Executive cannot access payroll before run deadline",
+  "tier": 2,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] CFO cannot open payroll app before payroll cutoff",
+    "description": "CFO has a payroll-approval deadline in 90 minutes and cannot load the payroll app. Browser shows blank page after sign-in.",
+    "impact": "1", "urgency": "1",
+    "category": "inquiry", "subcategory": "internal_application",
+    "caller_id": "Training User", "cmdb_ci": "HRIS-PAYROLL-PROD"
+  },
+  "expected": {
+    "action": "escalate",
+    "assignment_group": "HRIS Application Support",
+    "impact": 2, "urgency": 1, "priority": 2,
+    "required_events": ["validate_caller", "check_scope", "check_related_incidents", "collect_evidence", "set_impact_urgency", "assign_group", "add_work_note", "add_comment"],
+    "required_note_keywords": ["verified caller", "deadline", "browser test", "other users", "screenshot", "business impact", "assignment reason"]
+  },
+  "correct_steps": [
+    "Verify caller (executive - high stakes, follow VIP procedure)",
+    "Capture exact behavior: blank page vs error vs spinner",
+    "Test alternate browser and incognito to rule out client cache",
+    "Ask whether other Finance users hit the same screen (check related incidents)",
+    "Capture screenshot, timestamp, user ID, deadline, business impact",
+    "Escalate to HRIS Application Support immediately - do NOT loop on browser tricks"
+  ],
+  "rationale": "VIP + business deadline + production app = P2 escalate, not P3 troubleshoot. Capture evidence and route fast.",
+  "response_deadline_minutes": 10,
+  "partial_groups": { "Service Desk": 0.3, "Application Support": 0.7 },
+  "hints": [
+    "Time-bounded business deadlines push priority up regardless of user count.",
+    "Two minutes of evidence beats 30 minutes of browser troubleshooting."
+  ],
+  "learning_objectives": [
+    "Recognize VIP + deadline as a priority driver",
+    "Escalate fast with evidence rather than burning the clock"
+  ],
+  "tool_clues": {
+    "service_health": "HRIS-PAYROLL-PROD: Degraded - 4 related INCs in last 30 minutes.",
+    "ad": "Caller verified: CFO, on the executive distribution list."
+  }
+}

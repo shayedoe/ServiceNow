@@ -1,0 +1,41 @@
+{
+  "id": "t2_mfa_prompts_other_state",
+  "title": "User reports unexpected MFA prompts from another state",
+  "tier": 2,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] Unexpected MFA prompts from another state",
+    "description": "User in NY received 6 MFA push notifications in 10 minutes. Sign-in attempts appear from a different state. User did not approve.",
+    "impact": "2", "urgency": "1",
+    "category": "inquiry", "subcategory": "email",
+    "caller_id": "Training User", "cmdb_ci": "ENTRA-USER-A03"
+  },
+  "expected": {
+    "action": "escalate",
+    "assignment_group": "Security Operations",
+    "impact": 2, "urgency": 1, "priority": 2,
+    "required_events": ["validate_caller", "check_scope", "collect_evidence", "set_impact_urgency", "assign_group", "add_work_note", "add_comment"],
+    "required_note_keywords": ["verified caller", "sign-in location", "disabled sessions", "SecOps", "did not approve", "timestamp", "next action"]
+  },
+  "correct_steps": [
+    "Verify caller via callback (the account may be compromised)",
+    "Tell the user NOT to approve any MFA prompt",
+    "Check sign-in logs: confirm location anomaly and times",
+    "Disable active sessions, force a password reset, require MFA re-registration",
+    "Escalate to Security Operations with timestamps, source IP, and user agent"
+  ],
+  "rationale": "Unexpected MFA prompts are an MFA-fatigue / push-bombing signal. Treat as a potential compromise and hand to SecOps with evidence.",
+  "response_deadline_minutes": 5,
+  "partial_groups": { "Identity & Access Management": 0.6 },
+  "hints": [
+    "Never approve MFA on the user's behalf.",
+    "Disable sessions before troubleshooting."
+  ],
+  "learning_objectives": [
+    "Recognize MFA-fatigue / push-bombing patterns",
+    "Stop the active threat before opening a long ticket"
+  ],
+  "tool_clues": {
+    "sso": "6 sign-in attempts from IP in TX in last 10 min. User device is in NY.",
+    "ad": "Account: Active. Last successful sign-in: 2 hours ago, from NY office."
+  }
+}

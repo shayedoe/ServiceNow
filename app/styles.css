@@ -615,3 +615,8 @@ button.sn-btn.danger:hover:not(:disabled) { background: #922b21; }
 .tpl-row:first-of-type { border-top: 0; }
 .tpl-key { font-weight: 600; color: var(--sn-muted); text-transform: capitalize; }
 .tpl-val { color: var(--sn-text); }
+
+.res-filter { width:100%; padding:8px 10px; border:1px solid #d6dde2; border-radius:4px; font-size:13px; margin-bottom:14px; }
+.res-card ol { margin:6px 0 0 18px; padding:0; }
+.res-card code, .res-table code { background:#f3f5f7; padding:1px 5px; border-radius:3px; font-family:Consolas,monospace; font-size:12px; }
+.res-note { background:#fffae0; border-left:3px solid #f0c000; padding:8px 12px; margin:8px 0; }

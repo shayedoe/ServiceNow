@@ -1,0 +1,41 @@
+{
+  "id": "t2_repeated_lockouts_after_reset",
+  "title": "User account locked repeatedly after a successful password reset",
+  "tier": 2,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] Account locks again within minutes of every reset",
+    "description": "Caller's account locks within 5 minutes of every password reset. Has happened 3 times today. Lockout source is unknown.",
+    "impact": "2", "urgency": "2",
+    "category": "password_reset", "subcategory": "",
+    "caller_id": "Training User", "cmdb_ci": "AD-USER-A02"
+  },
+  "expected": {
+    "action": "escalate",
+    "assignment_group": "Identity & Access Management",
+    "impact": 2, "urgency": 2, "priority": 3,
+    "required_events": ["validate_caller", "check_scope", "check_related_incidents", "collect_evidence", "set_impact_urgency", "assign_group", "add_work_note"],
+    "required_note_keywords": ["verified caller", "AD unlock attempted", "lockout source", "device", "scope checked", "assignment reason"]
+  },
+  "correct_steps": [
+    "Verify caller identity",
+    "Unlock the account in AD and capture LastBadPasswordAttempt + lockout source DC",
+    "Ask whether the user has stored the old password on a phone, mapped drive, scheduled task, or another device",
+    "Check whether the user has multiple sessions on different devices",
+    "Escalate to IAM with the lockout source DC and any device names involved"
+  ],
+  "rationale": "A lockout that repeats after a clean reset means an unknown source is presenting the old credential. Tier 1 should not loop on resets - escalate to IAM with evidence.",
+  "response_deadline_minutes": 15,
+  "partial_groups": { "Service Desk": 0.4, "Security Operations": 0.6 },
+  "hints": [
+    "Capture the lockout source DC. That is the single most useful piece of evidence for IAM.",
+    "Check for stored credentials on phones and mapped drives."
+  ],
+  "learning_objectives": [
+    "Recognize when a password reset will not solve the problem",
+    "Capture lockout source and device evidence for IAM"
+  ],
+  "tool_clues": {
+    "ad": "Account: Locked. Bad password count: 5 in 4 minutes. Lockout source DC: DC-CORP-04.",
+    "intune": "User has 2 enrolled devices. Last sign-in 2 minutes ago from LAP-1187."
+  }
+}

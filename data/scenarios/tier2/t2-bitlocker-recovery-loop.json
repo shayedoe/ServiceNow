@@ -1,0 +1,41 @@
+{
+  "id": "t2_bitlocker_recovery_loop",
+  "title": "Laptop stuck in BitLocker recovery loop",
+  "tier": 2,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] Laptop boots into BitLocker recovery and will not pass",
+    "description": "User's laptop boots straight to a BitLocker recovery key prompt and loops back after every entry attempt. User does not have a recovery key.",
+    "impact": "2", "urgency": "2",
+    "category": "hardware", "subcategory": "disk",
+    "caller_id": "Training User", "cmdb_ci": "LAP-7842"
+  },
+  "expected": {
+    "action": "escalate",
+    "assignment_group": "Desktop Support",
+    "impact": 2, "urgency": 2, "priority": 2,
+    "required_events": ["validate_caller", "check_scope", "collect_evidence", "set_impact_urgency", "assign_group", "add_work_note", "add_comment"],
+    "required_note_keywords": ["asset tag", "recovery key", "TPM", "BIOS", "device name", "assignment reason"]
+  },
+  "correct_steps": [
+    "Verify caller and capture asset tag",
+    "Look up the BitLocker recovery key in Intune / Azure AD",
+    "If a key is found, walk the user through entering it once and confirm boot",
+    "If no key is on file, do NOT keep re-attempting - escalate to Desktop Support",
+    "Note any recent BIOS/TPM/firmware change that may have triggered the loop"
+  ],
+  "rationale": "BitLocker recovery is a one-shot procedure. Without the key, repeated attempts do nothing. If no key is on file, hand off with the asset tag.",
+  "response_deadline_minutes": 15,
+  "partial_groups": { "Endpoint Engineering": 0.7 },
+  "hints": [
+    "Always check the IAM portal for the recovery key first.",
+    "A recent BIOS/TPM change is a common trigger."
+  ],
+  "learning_objectives": [
+    "Use IAM portal to retrieve BitLocker recovery keys",
+    "Recognize when continuing Tier 1 attempts wastes the user's time"
+  ],
+  "tool_clues": {
+    "intune": "Device LAP-7842 last check-in 7 days ago. BitLocker recovery key: NOT on file.",
+    "endpoint": "Last firmware update 2 days ago (BIOS 1.34 -> 1.36)."
+  }
+}

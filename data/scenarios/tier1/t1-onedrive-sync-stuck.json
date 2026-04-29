@@ -1,0 +1,40 @@
+{
+  "id": "t1_onedrive_sync_stuck",
+  "title": "OneDrive sync stuck with red X",
+  "tier": 1,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] OneDrive shows red X and stops syncing",
+    "description": "User sees a red X on the OneDrive icon. Files have not synced for several hours. Other apps work.",
+    "impact": "3", "urgency": "3",
+    "category": "software", "subcategory": "operating_system",
+    "caller_id": "Training User", "cmdb_ci": "ONEDRIVE-CLIENT"
+  },
+  "expected": {
+    "action": "resolve",
+    "assignment_group": "Service Desk",
+    "impact": 3, "urgency": 3, "priority": 4,
+    "required_events": ["validate_caller", "check_scope", "collect_evidence", "assign_group", "add_work_note", "add_comment"],
+    "required_note_keywords": ["account signed in", "sync client restarted", "storage", "conflict", "test result"]
+  },
+  "correct_steps": [
+    "Verify caller and confirm only one user is affected",
+    "Check OneDrive account is signed in (Settings > Account)",
+    "Look for sync conflicts and resolve (rename or accept server copy)",
+    "Check available cloud storage and local disk space",
+    "Right-click OneDrive > Pause then Resume; if needed, sign out and back in"
+  ],
+  "rationale": "OneDrive red X is almost always a single-user sync conflict, storage limit, or stale token. Resolve at Tier 1.",
+  "response_deadline_minutes": 30,
+  "partial_groups": { "Desktop Support": 0.5 },
+  "hints": [
+    "Open the OneDrive activity center to see the exact error.",
+    "If multiple users hit the same error, check Service Health."
+  ],
+  "learning_objectives": [
+    "Distinguish a single-user client issue from a service outage"
+  ],
+  "tool_clues": {
+    "service_health": "OneDrive: Healthy.",
+    "endpoint": "Local disk: 2.3 GB free. OneDrive folder: 38 GB used / 50 GB quota."
+  }
+}

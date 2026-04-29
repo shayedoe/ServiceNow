@@ -1,0 +1,41 @@
+{
+  "id": "t2_vpn_cert_update_fails",
+  "title": "VPN fails after certificate update",
+  "tier": 2,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] VPN fails for multiple users after certificate update",
+    "description": "Several remote users cannot connect to corporate VPN since this morning. Client returns 'certificate not trusted' error.",
+    "impact": "2", "urgency": "2",
+    "category": "network", "subcategory": "vpn",
+    "caller_id": "Training User", "cmdb_ci": "VPN-GATEWAY-01"
+  },
+  "expected": {
+    "action": "escalate",
+    "assignment_group": "Network Operations",
+    "impact": 2, "urgency": 2, "priority": 2,
+    "required_events": ["validate_caller", "check_scope", "check_related_incidents", "collect_evidence", "set_impact_urgency", "assign_group", "add_work_note", "link_parent"],
+    "required_note_keywords": ["VPN client version", "certificate error", "number affected", "network", "scope checked", "assignment reason"]
+  },
+  "correct_steps": [
+    "Verify caller and capture exact error and VPN client version",
+    "Confirm scope by checking related incidents (multiple users)",
+    "Test reachability of the VPN gateway from a wired connection",
+    "Capture certificate fingerprint and expiry from the client",
+    "Link related tickets to a parent and escalate to Network Operations"
+  ],
+  "rationale": "A 'certificate not trusted' error spike across multiple users after a cert change is a fleet-wide gateway issue, not per-user.",
+  "response_deadline_minutes": 15,
+  "partial_groups": { "Network Operations - Tier 2": 0.9 },
+  "hints": [
+    "If the same error appears across users, do not troubleshoot each client.",
+    "Check for a recent certificate or gateway change."
+  ],
+  "learning_objectives": [
+    "Recognize fleet-wide VPN failures from per-user reports",
+    "Capture VPN client version and certificate evidence"
+  ],
+  "tool_clues": {
+    "vpn_logs": "Gateway VPN-GATEWAY-01 reissued certificate at 06:00. 47 client failures since 06:05.",
+    "change": "CHG0009201 'VPN gateway certificate renewal' completed 06:00."
+  }
+}

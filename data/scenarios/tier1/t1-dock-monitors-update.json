@@ -1,0 +1,41 @@
+{
+  "id": "t1_dock_monitors_update",
+  "title": "Docking station not detecting monitors after Windows update",
+  "tier": 1,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] Docking station not detecting external monitors",
+    "description": "User returned to the office after a Windows update overnight. The dock no longer drives either external monitor; laptop screen works.",
+    "impact": "3", "urgency": "3",
+    "category": "hardware", "subcategory": "monitor",
+    "caller_id": "Training User", "cmdb_ci": "DOCK-WD19"
+  },
+  "expected": {
+    "action": "resolve",
+    "assignment_group": "Desktop Support",
+    "impact": 3, "urgency": 3, "priority": 3,
+    "required_events": ["validate_caller", "check_scope", "collect_evidence", "assign_group", "add_work_note", "add_comment"],
+    "required_note_keywords": ["device name", "cable swap", "dock power cycle", "firmware", "driver", "test result", "next action"]
+  },
+  "correct_steps": [
+    "Verify caller and capture asset tag of laptop and dock",
+    "Confirm monitors work directly attached to the laptop (rules out monitors)",
+    "Cable swap (DisplayPort/HDMI/USB-C) and dock power cycle (unplug 30s)",
+    "Check dock firmware and graphics driver versions; install vendor updates if behind",
+    "If symptom persists or affects multiple users on same dock model, escalate"
+  ],
+  "rationale": "Dock failures after an OS update are usually driver/firmware. A direct-monitor test isolates dock vs monitor in seconds.",
+  "response_deadline_minutes": 20,
+  "partial_groups": { "Service Desk": 0.5 },
+  "hints": [
+    "Direct-attach the monitors first to isolate the dock.",
+    "If multiple users on the same dock model, escalate to Desktop Support - Tier 2."
+  ],
+  "learning_objectives": [
+    "Use isolation tests to prove which component is at fault",
+    "Document driver and firmware versions in work notes"
+  ],
+  "tool_clues": {
+    "cmdb": "Asset LAP-1234 paired with DOCK-WD19 firmware 1.0.21 (latest 1.0.34).",
+    "endpoint": "Display driver updated 6 hours ago by Windows Update."
+  }
+}

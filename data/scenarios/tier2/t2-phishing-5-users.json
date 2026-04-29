@@ -1,0 +1,41 @@
+{
+  "id": "t2_phishing_5_users",
+  "title": "Phishing email reported by 5 users",
+  "tier": 2,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] Phishing email reported by 5 users in same department",
+    "description": "Five users in Finance reported the same suspicious email asking them to verify payroll details. One user clicked the link before reporting.",
+    "impact": "2", "urgency": "1",
+    "category": "inquiry", "subcategory": "email",
+    "caller_id": "Training User", "cmdb_ci": "EMAIL-INBOUND"
+  },
+  "expected": {
+    "action": "escalate",
+    "assignment_group": "Security Operations",
+    "impact": 2, "urgency": 1, "priority": 2,
+    "required_events": ["validate_caller", "check_scope", "check_related_incidents", "collect_evidence", "set_impact_urgency", "assign_group", "add_work_note", "add_comment", "link_parent"],
+    "required_note_keywords": ["sender", "subject", "headers", "link", "users affected", "did not click", "next action"]
+  },
+  "correct_steps": [
+    "Verify reporter and tell every caller NOT to click, reply, or forward",
+    "Collect sender, subject, timestamp, headers (if available), URL, and attachment names",
+    "Check related incidents - confirm at least 5 reports",
+    "Identify the user who clicked: capture device, time, and any credentials entered",
+    "Link related tickets to a parent incident and escalate to Security Operations"
+  ],
+  "rationale": "A coordinated phishing wave is a SecOps event. Tier 1 collects evidence, contains the clicker, and hands off; Tier 1 does not investigate phishing alone.",
+  "response_deadline_minutes": 5,
+  "partial_groups": { "Messaging Engineering": 0.4 },
+  "hints": [
+    "Tell users: do not click, do not reply, do not forward.",
+    "The user who clicked is your most urgent containment task."
+  ],
+  "learning_objectives": [
+    "Treat multi-user phishing reports as a coordinated event",
+    "Contain the clicker before continuing the investigation"
+  ],
+  "tool_clues": {
+    "email": "5 messages from billing@payro11-update.com received between 09:12-09:14. 1 user clicked the URL.",
+    "security": "URL flagged as 'credential phishing' by reputation feed."
+  }
+}

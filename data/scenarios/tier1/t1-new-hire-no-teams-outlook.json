@@ -1,0 +1,44 @@
+{
+  "id": "t1_new_hire_no_teams_outlook",
+  "title": "New hire cannot access Teams or Outlook on day 1",
+  "tier": 1,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] New hire cannot sign in to Teams or Outlook",
+    "description": "First-day employee says Teams shows 'no licenses assigned' and Outlook will not connect to a mailbox. HR onboarding completed yesterday.",
+    "impact": "3", "urgency": "3",
+    "category": "identity", "subcategory": "iam/access",
+    "caller_id": "Training User",
+    "business_service": "Identity and Access",
+    "cmdb_ci": "M365-TENANT"
+  },
+  "expected": {
+    "action": "resolve",
+    "assignment_group": "Service Desk",
+    "impact": 3, "urgency": 3, "priority": 3,
+    "required_events": ["validate_caller", "check_scope", "collect_evidence", "assign_group", "add_work_note", "add_comment"],
+    "required_note_keywords": ["verified caller", "license", "mailbox", "tested sign-in", "single user", "next action"]
+  },
+  "correct_steps": [
+    "Verify identity with employee ID and start date",
+    "Check M365 admin: license assignment + mailbox provisioning state",
+    "If license missing and approved by manager, assign and re-test sign-in",
+    "If HR record missing, escalate to IAM (cannot create license without HR source-of-truth)",
+    "Confirm Teams and Outlook open after license + mailbox propagate"
+  ],
+  "rationale": "Day-1 access issues are usually license assignment, not a real outage. Verify the HR record exists before assigning licenses or you will create access for someone not yet authorized.",
+  "response_deadline_minutes": 15,
+  "partial_groups": { "Identity & Access Management": 0.7 },
+  "hints": [
+    "License missing? Resolve. HR record missing? Escalate to IAM.",
+    "Always test sign-in after assigning a license."
+  ],
+  "learning_objectives": [
+    "Distinguish access requests from incidents",
+    "Confirm HR source-of-truth before granting access"
+  ],
+  "tool_clues": {
+    "ad": "User exists. Department: Sales. License group: not assigned.",
+    "intune": "Device enrolled. Compliant.",
+    "service_health": "M365: Healthy. No service incidents."
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "id": "t3_terminated_account_active",
+  "title": "Terminated employee account still active",
+  "tier": 3,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] Terminated employee account still active in M365",
+    "description": "Manager reports a terminated employee can still sign into M365 and Teams two days after the end date. HR confirmed termination yesterday.",
+    "impact": "1", "urgency": "1",
+    "category": "identity", "subcategory": "iam/access",
+    "caller_id": "Training User", "cmdb_ci": "ENTRA-USER-A04"
+  },
+  "expected": {
+    "action": "escalate",
+    "assignment_group": "Identity & Access Management",
+    "impact": 1, "urgency": 1, "priority": 1,
+    "required_events": ["validate_caller", "check_scope", "collect_evidence", "set_impact_urgency", "assign_group", "add_work_note", "add_comment"],
+    "required_note_keywords": ["user identified", "HR termination confirmed", "access disabled", "manager notified", "device", "next action"]
+  },
+  "correct_steps": [
+    "Verify the manager / reporter identity",
+    "Confirm HR termination record (date, manager, ticket)",
+    "Disable the account immediately, revoke active tokens, force sign-out everywhere",
+    "Capture device list and last sign-in times",
+    "Escalate to IAM + Security Operations for full deprovisioning, license removal, and access review",
+    "Notify the manager when containment is complete"
+  ],
+  "rationale": "An active account after termination is both a Security event and an IAM process gap. Contain first (disable + revoke), then hand off to IAM and SecOps for the full off-board and audit.",
+  "response_deadline_minutes": 5,
+  "partial_groups": { "Security Operations": 0.9 },
+  "hints": [
+    "Containment first: disable and revoke. Investigation second.",
+    "Always capture device list and sign-in history before tokens expire."
+  ],
+  "learning_objectives": [
+    "Treat off-board gaps as a security event, not a paperwork issue",
+    "Run the contain-then-investigate playbook"
+  ],
+  "tool_clues": {
+    "ad": "Account: Active. Last sign-in: 4 hours ago from personal device. Manager-of-record: J. Smith.",
+    "security": "No suspicious activity flagged yet. Full audit required."
+  }
+}

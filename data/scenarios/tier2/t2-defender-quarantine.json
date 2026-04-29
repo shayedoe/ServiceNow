@@ -1,0 +1,41 @@
+{
+  "id": "t2_defender_quarantine",
+  "title": "Defender quarantined malware on endpoint",
+  "tier": 2,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] Defender quarantined a malicious file on user laptop",
+    "description": "Defender for Endpoint quarantined a file on user's laptop. Alert ID raised; device automatically isolated by EDR policy.",
+    "impact": "2", "urgency": "2",
+    "category": "inquiry", "subcategory": "antivirus",
+    "caller_id": "Training User", "cmdb_ci": "LAP-9013"
+  },
+  "expected": {
+    "action": "escalate",
+    "assignment_group": "Security Operations",
+    "impact": 2, "urgency": 2, "priority": 2,
+    "required_events": ["validate_caller", "check_scope", "collect_evidence", "set_impact_urgency", "assign_group", "add_work_note", "add_comment"],
+    "required_note_keywords": ["device isolated", "alert ID", "file path", "user activity", "Defender status", "next action"]
+  },
+  "correct_steps": [
+    "Verify caller and confirm the device is the one in the alert",
+    "Do NOT release the device from isolation",
+    "Capture alert ID, file path, file hash if available",
+    "Ask the user what they were doing when the file landed (download, email, USB?)",
+    "Escalate to Security Operations with the alert ID and user statement"
+  ],
+  "rationale": "An EDR isolation is a containment action. Service Desk supports the user and gathers context; SecOps decides when to release isolation.",
+  "response_deadline_minutes": 10,
+  "partial_groups": { "Endpoint Engineering": 0.4 },
+  "hints": [
+    "Never release isolation without SecOps approval.",
+    "User context (where the file came from) is gold for SecOps."
+  ],
+  "learning_objectives": [
+    "Treat EDR isolation as a containment success, not a problem to undo",
+    "Collect user-activity context for SecOps"
+  ],
+  "tool_clues": {
+    "security": "Defender alert MD-44129 - 'Trojan:Win32/Wacatac' quarantined at C:\\Users\\bob\\Downloads\\invoice.docm.exe. Device isolated.",
+    "endpoint": "Last process: Outlook attachment opened 14 minutes before quarantine."
+  }
+}

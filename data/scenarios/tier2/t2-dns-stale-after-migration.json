@@ -1,0 +1,41 @@
+{
+  "id": "t2_dns_stale_after_migration",
+  "title": "DNS resolves old IP after app migration",
+  "tier": 2,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] App resolves to old IP after migration",
+    "description": "Internal app crm.corp.local resolves to the old data-center IP for some users. App was migrated to a new subnet last night.",
+    "impact": "2", "urgency": "2",
+    "category": "network", "subcategory": "dns",
+    "caller_id": "Training User", "cmdb_ci": "DNS-CORP-RECORDS"
+  },
+  "expected": {
+    "action": "escalate",
+    "assignment_group": "Network Engineering",
+    "impact": 2, "urgency": 2, "priority": 2,
+    "required_events": ["validate_caller", "check_scope", "check_related_incidents", "collect_evidence", "set_impact_urgency", "assign_group", "add_work_note", "link_parent"],
+    "required_note_keywords": ["nslookup", "hostname", "TTL", "old IP", "new IP", "timestamp", "scope checked"]
+  },
+  "correct_steps": [
+    "Verify caller and capture affected hostname (crm.corp.local)",
+    "Run nslookup crm.corp.local against client DNS and against authoritative DNS",
+    "Compare returned IP vs the post-migration IP",
+    "Check related incidents - others on same subnet may be hitting the same stale record",
+    "Capture TTL and the change window; escalate to Network Engineering to push the corrected record"
+  ],
+  "rationale": "Stale DNS after a migration is an infrastructure record problem, not a client problem. Capture nslookup evidence so Network Engineering can fix once.",
+  "response_deadline_minutes": 15,
+  "partial_groups": { "Network Operations": 0.8 },
+  "hints": [
+    "ipconfig /flushdns is a single-user workaround, not a fix.",
+    "Compare client DNS vs authoritative DNS to prove staleness."
+  ],
+  "learning_objectives": [
+    "Use nslookup to capture DNS evidence",
+    "Tie incidents to a recent change window"
+  ],
+  "tool_clues": {
+    "dns": "nslookup crm.corp.local -> 10.20.5.41 (old). Authoritative: 10.40.7.12 (new). TTL 86400.",
+    "change": "CHG0009123 'CRM migration to subnet 10.40.7.0/24' completed 22:00 last night."
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "id": "t3_floor_wifi_outage",
+  "title": "Entire floor lost Wi-Fi",
+  "tier": 3,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] Entire 4th floor lost Wi-Fi connectivity",
+    "description": "Twenty-plus callers from the 4th floor report no Wi-Fi. Wired connections work. Other floors unaffected.",
+    "impact": "1", "urgency": "1",
+    "category": "network", "subcategory": "wireless",
+    "caller_id": "Training User", "cmdb_ci": "AP-FLOOR-4"
+  },
+  "expected": {
+    "action": "escalate",
+    "assignment_group": "Network Operations",
+    "impact": 1, "urgency": 1, "priority": 1,
+    "required_events": ["validate_caller", "check_scope", "check_related_incidents", "check_known_outage", "collect_evidence", "set_impact_urgency", "assign_group", "add_work_note", "add_comment", "link_parent"],
+    "required_note_keywords": ["number affected", "floor", "AP", "SSID", "related", "wired test", "business impact", "next action"]
+  },
+  "correct_steps": [
+    "Verify caller and capture floor + SSID",
+    "Check related incidents - confirm 3+ tickets from same floor",
+    "Test wired connection works (rules out DHCP/DNS/identity)",
+    "Open or link a parent (major) incident; flag as outage",
+    "Notify Incident Commander; escalate to Network Operations with AP/SSID/floor evidence",
+    "Send caller communication with current scope and ETA cadence"
+  ],
+  "rationale": "Floor-wide Wi-Fi loss is an outage. Move into major-incident workflow: parent incident, comms, and Network Ops takes the technical fix.",
+  "response_deadline_minutes": 5,
+  "partial_groups": { "Network Engineering - Tier 3": 0.7 },
+  "hints": [
+    "Once you see 3+ same-floor tickets, stop troubleshooting individuals.",
+    "Wired test rules out everything except the wireless layer."
+  ],
+  "learning_objectives": [
+    "Move from incident to major-incident workflow when scope crosses a floor",
+    "Drive comms to stakeholders during outages"
+  ],
+  "tool_clues": {
+    "network": "AP-FLOOR-4 cluster: 6 APs offline since 09:42. WLC alarm raised.",
+    "service_health": "Wired LAN: Healthy. Wireless: Outage on floor 4."
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "id": "t1_conference_room_camera",
+  "title": "Conference room camera not detected before meeting",
+  "tier": 1,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] Conference room camera not detected in Teams",
+    "description": "Caller starts a Teams meeting in conference room CR-3A. Camera is not detected. Microphone works.",
+    "impact": "3", "urgency": "3",
+    "category": "hardware", "subcategory": "monitor",
+    "caller_id": "Training User", "cmdb_ci": "CR-3A-LOGI-RALLY"
+  },
+  "expected": {
+    "action": "resolve",
+    "assignment_group": "AV Support",
+    "impact": 3, "urgency": 3, "priority": 3,
+    "required_events": ["validate_caller", "check_scope", "collect_evidence", "assign_group", "add_work_note", "add_comment"],
+    "required_note_keywords": ["room name", "USB", "device manager", "Teams test", "alternate cable", "test result"]
+  },
+  "correct_steps": [
+    "Capture room name (CR-3A) and meeting start time",
+    "Reseat the USB cable from camera to room PC; try alternate USB port",
+    "Confirm camera appears in Device Manager / Teams device settings",
+    "Send a Teams test call to verify",
+    "If still not detected, escalate to AV Support with room and device serial"
+  ],
+  "rationale": "Conference room AV is a separate routing target. Service Desk should attempt the basic USB/Teams test, then hand off to AV with the room name and serial.",
+  "response_deadline_minutes": 10,
+  "partial_groups": { "Service Desk": 0.6, "Desktop Support": 0.5 },
+  "hints": [
+    "Always include the room name in the work note.",
+    "Try a known-good USB port before escalating."
+  ],
+  "learning_objectives": [
+    "Treat conference rooms as a distinct CI with a distinct support team",
+    "Capture room and serial in every AV ticket"
+  ],
+  "tool_clues": {
+    "cmdb": "CI: CR-3A Room PC (Lenovo M90n). Camera: Logitech Rally serial RLY-3A-009.",
+    "service_health": "Teams: Healthy."
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "id": "t1_shared_mailbox_missing",
+  "title": "Shared mailbox missing in Outlook",
+  "tier": 1,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] Shared mailbox no longer appears in Outlook",
+    "description": "User says the AP-Invoices shared mailbox disappeared from Outlook this morning. Other shared mailboxes still appear.",
+    "impact": "3", "urgency": "3",
+    "category": "software", "subcategory": "email",
+    "caller_id": "Training User", "cmdb_ci": "MBX-AP-INVOICES"
+  },
+  "expected": {
+    "action": "resolve",
+    "assignment_group": "Service Desk",
+    "impact": 3, "urgency": 3, "priority": 4,
+    "required_events": ["validate_caller", "check_scope", "collect_evidence", "assign_group", "add_work_note", "add_comment"],
+    "required_note_keywords": ["verified caller", "permissions", "mailbox name", "Outlook", "OWA", "test result"]
+  },
+  "correct_steps": [
+    "Verify caller identity",
+    "Check if user is still a member of the shared-mailbox permissions group",
+    "Test the shared mailbox in OWA to isolate client vs permissions",
+    "If permissions removed, restore via IAM workflow and re-add in Outlook",
+    "If user still has permission but mailbox is gone in OWA, escalate to Messaging"
+  ],
+  "rationale": "A missing shared mailbox is usually a permissions change. OWA isolates client cache vs real permission loss in one step.",
+  "response_deadline_minutes": 30,
+  "partial_groups": { "Identity & Access Management": 0.7, "Messaging Engineering": 0.5 },
+  "hints": [
+    "Always test in OWA first.",
+    "Check the permissions group, not just the mailbox."
+  ],
+  "learning_objectives": [
+    "Use OWA to isolate Outlook client vs server-side issues",
+    "Map shared mailboxes to their access groups"
+  ],
+  "tool_clues": {
+    "ad": "User is NOT a member of 'AP-Invoices-RW' group (was removed yesterday).",
+    "service_health": "Exchange Online: Healthy."
+  }
+}

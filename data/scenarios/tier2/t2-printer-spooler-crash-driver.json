@@ -1,0 +1,41 @@
+{
+  "id": "t2_printer_spooler_crash_driver",
+  "title": "Printer spooler keeps crashing after driver update",
+  "tier": 2,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] Spooler crashes repeatedly after driver rollout",
+    "description": "Multiple users report Print Spooler crashing every few minutes since last night's driver rollout. Restarting the spooler restores printing for ~5 minutes.",
+    "impact": "2", "urgency": "2",
+    "category": "hardware", "subcategory": "monitor",
+    "caller_id": "Training User", "cmdb_ci": "PRINT-DRIVER-V12.4"
+  },
+  "expected": {
+    "action": "escalate",
+    "assignment_group": "Endpoint Engineering",
+    "impact": 2, "urgency": 2, "priority": 2,
+    "required_events": ["validate_caller", "check_scope", "check_related_incidents", "collect_evidence", "set_impact_urgency", "assign_group", "add_work_note", "link_parent"],
+    "required_note_keywords": ["driver version", "affected models", "spooler restart attempted", "logs", "scope checked", "assignment reason"]
+  },
+  "correct_steps": [
+    "Verify caller, capture device names of affected users",
+    "Check related incidents - confirm pattern after the v12.4 driver rollout",
+    "Capture driver version (current and previous) and crash timestamps",
+    "Confirm spooler restart provides only short-term relief",
+    "Link affected tickets to a parent incident; escalate to Endpoint Engineering for driver rollback"
+  ],
+  "rationale": "Spooler crashes correlated with a fleet-wide driver rollout are a deployment regression, not per-device tickets. Escalate to the team that owns deployments.",
+  "response_deadline_minutes": 15,
+  "partial_groups": { "Desktop Support - Tier 2": 0.7 },
+  "hints": [
+    "Restarting the spooler is a workaround, not a fix.",
+    "Look for a recent change. Driver versions matter."
+  ],
+  "learning_objectives": [
+    "Tie incidents to recent changes",
+    "Use parent incidents for fleet-wide driver regressions"
+  ],
+  "tool_clues": {
+    "endpoint": "Driver Print-V12.4 deployed via Intune at 02:00 last night. Crash spike began 02:30.",
+    "print_server": "12 endpoints reporting spoolsv.exe crash dumps in last 4 hours."
+  }
+}

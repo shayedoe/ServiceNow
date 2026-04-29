@@ -25,11 +25,14 @@ const ACTION_LABELS = {
   validate_caller: 'Validate Caller',
   check_scope: 'Check Scope',
   check_related_incidents: 'Check Related Incidents',
+  check_known_outage: 'Check Known Outage',
+  collect_evidence: 'Collect Evidence',
   set_impact_urgency: 'Set Impact/Urgency',
   assign_group: 'Assign Group',
   add_work_note: 'Add Work Note',
   add_comment: 'Add Caller Comment',
   link_parent: 'Link Parent Incident',
+  link_parent_incident: 'Link Parent Incident',
   hint_used: 'Hint Used',
   escalate: 'Escalate',
   resolve: 'Resolve'
@@ -198,11 +201,43 @@ async function renderResources() {
   }
   const r = _resourcesCache;
 
+  const ivr = r.incident_vs_request || {};
+  const ivrCard = ivr.incident || ivr.service_request ? `
+    <div class="res-grid">
+      <div class="res-card">
+        <div class="res-card-h">Incident</div>
+        <p>${escapeHtml(ivr.incident?.definition || '')}</p>
+        <ul>${(ivr.incident?.examples || []).map(x => `<li>${escapeHtml(x)}</li>`).join('')}</ul>
+      </div>
+      <div class="res-card">
+        <div class="res-card-h">Service Request</div>
+        <p>${escapeHtml(ivr.service_request?.definition || '')}</p>
+        <ul>${(ivr.service_request?.examples || []).map(x => `<li>${escapeHtml(x)}</li>`).join('')}</ul>
+      </div>
+    </div>
+    ${ivr.key_difference ? `<p class="res-note"><strong>Key difference:</strong> ${escapeHtml(ivr.key_difference)}</p>` : ''}` : '';
+
   const triage = (r.triage_flow || []).map(s => `
     <div class="res-card">
       <div class="res-card-h">${s.step}. ${escapeHtml(s.name)}</div>
       <ul>${(s.questions || []).map(q => `<li>${escapeHtml(q)}</li>`).join('')}</ul>
     </div>`).join('');
+
+  const playbooks = Object.entries(r.troubleshooting_playbooks || {}).map(([k, steps]) => `
+    <div class="res-card">
+      <div class="res-card-h">${escapeHtml(k.replace(/_/g, ' / ').toUpperCase())}</div>
+      <ol>${(steps || []).map(s => `<li>${escapeHtml(s)}</li>`).join('')}</ol>
+    </div>`).join('');
+
+  const commands = `<table class="res-table"><thead><tr><th>Platform</th><th>Command</th><th>Purpose</th></tr></thead><tbody>
+    ${(r.common_commands || []).map(c => `<tr>
+      <td>${escapeHtml(c.platform)}</td>
+      <td><code>${escapeHtml(c.command)}</code></td>
+      <td>${escapeHtml(c.purpose)}</td>
+    </tr>`).join('')}
+  </tbody></table>`;
+
+  const tips = `<ol class="res-list">${(r.coaching_tips || []).map(t => `<li>${escapeHtml(t)}</li>`).join('')}</ol>`;
 
   const priority = `<table class="res-table"><thead><tr><th>Priority</th><th>Impact</th><th>Urgency</th><th>Use when</th></tr></thead><tbody>
     ${(r.priority_matrix || []).map(p => `<tr>
@@ -243,35 +278,60 @@ async function renderResources() {
       <span class="breadcrumb">Service Desk &raquo; Knowledge</span>
     </div>
     <div class="res-page">
-      <section class="res-section">
+      <input id="resourcesFilter" class="res-filter" placeholder="Filter resources (e.g. 'phishing', 'dns', 'priority')" />
+      ${ivrCard ? `<section class="res-section" data-section><h3>Incident vs Service Request</h3>${ivrCard}</section>` : ''}
+      <section class="res-section" data-section>
         <h3>Triage flow</h3>
         <div class="res-grid">${triage}</div>
       </section>
-      <section class="res-section">
+      <section class="res-section" data-section>
         <h3>Priority matrix</h3>
         ${priority}
       </section>
-      <section class="res-section">
+      <section class="res-section" data-section>
         <h3>Routing matrix</h3>
         ${routing}
       </section>
-      <section class="res-section">
+      ${playbooks ? `<section class="res-section" data-section>
+        <h3>Troubleshooting playbooks</h3>
+        <div class="res-grid">${playbooks}</div>
+      </section>` : ''}
+      <section class="res-section" data-section>
         <h3>Templates</h3>
         <div class="res-grid">
           ${tplBlock('Work note templates', r.work_note_templates)}
-          ${tplBlock('Caller comment templates', r.customer_comment_templates)}
+          ${tplBlock('Caller comment templates', r.caller_comment_templates || r.customer_comment_templates)}
         </div>
       </section>
-      <section class="res-section">
+      <section class="res-section" data-section>
         <h3>Escalation triggers</h3>
         ${triggers}
       </section>
-      <section class="res-section">
+      <section class="res-section" data-section>
         <h3>Closure checklist</h3>
         ${closure}
       </section>
+      ${(r.common_commands || []).length ? `<section class="res-section" data-section>
+        <h3>Common commands</h3>
+        ${commands}
+      </section>` : ''}
+      ${(r.coaching_tips || []).length ? `<section class="res-section" data-section>
+        <h3>Coaching tips</h3>
+        ${tips}
+      </section>` : ''}
     </div>
   `;
+
+  const filter = document.getElementById('resourcesFilter');
+  if (filter) {
+    filter.addEventListener('input', () => {
+      const q = filter.value.trim().toLowerCase();
+      document.querySelectorAll('[data-section]').forEach(sec => {
+        const text = sec.textContent.toLowerCase();
+        sec.style.display = !q || text.includes(q) ? '' : 'none';
+      });
+    });
+  }
 }
 
 // ============================================================
@@ -739,6 +799,8 @@ function renderTrainingPanel(t) {
     { id: 'qaValidate', action: 'validate_caller', label: 'Validate Caller' },
     { id: 'qaScope', action: 'check_scope', label: 'Check Scope' },
     { id: 'qaRelated', action: 'check_related_incidents', label: 'Check Related Incidents' },
+    { id: 'qaOutage', action: 'check_known_outage', label: 'Check Known Outage' },
+    { id: 'qaEvidence', action: 'collect_evidence', label: 'Collect Evidence' },
     { id: 'qaParent', action: 'link_parent', label: 'Link Parent Incident' }
   ];
   const qaHtml = QUICK.map(q => {
