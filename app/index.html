@@ -6,56 +6,111 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">Help Desk Simulator</div>
-    <div class="actions">
-      <span id="shiftScore" class="score">Shift: 0/0 correct (0 resolved)</span>
-      <label for="tierSelect" style="font-size:12px;color:#cbd5e1;">Difficulty</label>
-      <select id="tierSelect" class="tier-select">
-        <option value="1">Tier 1 (basic)</option>
-        <option value="2">Tier 2 (intermediate)</option>
-        <option value="3">Tier 3 (advanced)</option>
-      </select>
-      <label class="live-toggle"><input type="checkbox" id="authoredMode" /> Authored Pack</label>
-      <label class="live-toggle"><input type="checkbox" id="liveMode" /> Live ServiceNow</label>
-      <button id="settingsBtn" title="ServiceNow settings">&#9881;</button>
-      <button id="startShiftBtn" class="primary">Start Shift</button>
-    </div>
-  </header>
+  <div class="sn-app">
+    <!-- LEFT NAVIGATOR -->
+    <aside class="sn-left-nav">
+      <div class="sn-logo">servicenow<span class="trainer">trainer</span></div>
+      <div class="sn-filter">
+        <input id="navFilter" placeholder="Filter navigator" />
+      </div>
+      <nav id="navList">
+        <div class="nav-group">Service Desk</div>
+        <button data-view="queue" class="nav-btn active">Incidents</button>
+        <button data-view="callers" class="nav-btn" disabled>Callers</button>
+        <button data-view="knowledge" class="nav-btn" disabled>Knowledge</button>
+        <button data-view="mywork" class="nav-btn" disabled>My Work</button>
 
-  <div id="settingsModal" class="modal hidden">
-    <div class="modal-card">
-      <h3>ServiceNow Connection</h3>
-      <div class="field"><label>Instance URL</label>
-        <input id="snInstance" placeholder="https://devXXXXXX.service-now.com" />
+        <div class="nav-group">Training</div>
+        <button id="btnStartShift" class="nav-btn primary-nav">Start Training Shift</button>
+        <button id="btnFinishShift" class="nav-btn">End Shift &amp; Debrief</button>
+
+        <div class="nav-group">Settings</div>
+        <button id="settingsBtn" class="nav-btn">ServiceNow Connection</button>
+      </nav>
+
+      <div class="nav-footer">
+        <div class="conn-status" id="connStatus">Offline mode</div>
       </div>
-      <div class="field"><label>Username</label>
-        <input id="snUser" placeholder="admin" />
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="sn-main">
+      <header class="sn-topbar">
+        <div class="record-pill" id="recordPill">Incident Queue</div>
+        <input class="global-search" placeholder="Search" />
+        <div class="topbar-spacer"></div>
+        <span id="shiftScore" class="topbar-score">No active shift</span>
+      </header>
+
+      <!-- Settings modal -->
+      <div id="settingsModal" class="modal hidden">
+        <div class="modal-card">
+          <h3>ServiceNow Connection</h3>
+          <div class="field-row"><label>Instance URL</label>
+            <input id="snInstance" placeholder="https://devXXXXXX.service-now.com" />
+          </div>
+          <div class="field-row"><label>Username</label>
+            <input id="snUser" placeholder="admin" />
+          </div>
+          <div class="field-row"><label>Password</label>
+            <input id="snPass" type="password" placeholder="(stored locally only)" />
+          </div>
+          <div class="field-row"><label>Pull mode</label>
+            <select id="snMode">
+              <option value="open">Open / Active incidents</option>
+              <option value="closed">Closed / Resolved (with answer key)</option>
+            </select>
+          </div>
+          <div class="field-row"><label>Source</label>
+            <select id="sourceSelect">
+              <option value="offline">Offline (generated)</option>
+              <option value="authored">Authored Pack (Tier 1-3)</option>
+              <option value="live">Live ServiceNow</option>
+            </select>
+          </div>
+          <div class="field-row"><label>Tier (offline)</label>
+            <select id="tierSelect">
+              <option value="1">Tier 1 (basic)</option>
+              <option value="2">Tier 2 (intermediate)</option>
+              <option value="3">Tier 3 (advanced)</option>
+            </select>
+          </div>
+          <div id="snStatus" class="sn-status"></div>
+          <div class="modal-actions">
+            <button id="snTestBtn">Test Connection</button>
+            <button id="snSaveBtn" class="primary">Save</button>
+            <button id="snCloseBtn">Close</button>
+          </div>
+          <p class="muted">Password is encrypted via OS keystore (Windows DPAPI / macOS Keychain). Use a Personal Developer Instance only.</p>
+        </div>
       </div>
-      <div class="field"><label>Password</label>
-        <input id="snPass" type="password" placeholder="(stored locally only)" />
+
+      <!-- Dynamic view container -->
+      <div id="viewContainer" class="view-container">
+        <div class="empty-large">
+          <h2>Welcome to the Help Desk Trainer</h2>
+          <p>Click <strong>Start Training Shift</strong> in the navigator to load an incident queue, or open Settings to connect to your ServiceNow PDI.</p>
+        </div>
       </div>
-      <div class="field"><label>Mode</label>
-        <select id="snMode">
-          <option value="closed">Closed/Resolved (training with answer key)</option>
-          <option value="open">Open / Active</option>
-        </select>
+    </main>
+
+    <!-- RIGHT TRAINING PANEL -->
+    <aside class="training-panel" id="trainingPanel">
+      <div class="tp-section">
+        <h2>Training Checklist</h2>
+        <div id="checklist" class="empty">Open an incident to see required actions.</div>
       </div>
-      <div id="snStatus" class="sn-status"></div>
-      <div class="modal-actions">
-        <button id="snTestBtn">Test Connection</button>
-        <button id="snSaveBtn" class="primary">Save</button>
-        <button id="snCloseBtn">Close</button>
+      <div class="tp-section">
+        <h2>Coach</h2>
+        <div id="coachPanel" class="empty">Hints appear here when requested.</div>
+        <button id="btnHint" class="hint-btn" disabled>Get Hint</button>
       </div>
-      <p class="muted">Password is encrypted with the OS keystore (Windows DPAPI / macOS Keychain) when available. Use a Personal Developer Instance only.</p>
-    </div>
+      <div class="tp-section">
+        <h2>Action Timeline</h2>
+        <div id="eventLog" class="event-log empty">No actions recorded yet.</div>
+      </div>
+    </aside>
   </div>
-
-  <main class="layout exam-layout">
-    <section id="examShell" class="exam-shell">
-      <div class="empty large">Click "Start Shift" to begin a 10-question exam.</div>
-    </section>
-  </main>
 
   <script src="renderer.js"></script>
 </body>

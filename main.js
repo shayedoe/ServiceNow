@@ -21,6 +21,10 @@ function createWindow() {
 
   mainWindow.setMenuBarVisibility(false);
   mainWindow.loadFile(path.join(__dirname, 'app', 'index.html'));
+
+  mainWindow.webContents.on('render-process-gone', (_e, details) => {
+    console.error('Renderer gone:', details.reason, details.exitCode);
+  });
 }
 
 app.whenReady().then(() => {
