@@ -1,0 +1,54 @@
+{
+  "id": "t2_conference_room_wifi_slow",
+  "title": "Conference room Wi-Fi slow",
+  "tier": 2,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] Conference room Wi-Fi unusably slow",
+    "description": "During meetings, users in the main conference room report <1 Mbps while nearby offices are normal.",
+    "impact": "3",
+    "urgency": "2",
+    "category": "network",
+    "subcategory": "wireless",
+    "caller_id": "Training User",
+    "business_service": "Network Access",
+    "cmdb_ci": "AP-CONF-01"
+  },
+  "expected": {
+    "action": "escalate",
+    "assignment_group": "Network Operations - Tier 2",
+    "impact": 3,
+    "urgency": 2,
+    "priority": 3,
+    "required_events": [
+      "validate_caller",
+      "check_scope",
+      "check_related_incidents",
+      "set_impact_urgency",
+      "assign_group",
+      "add_work_note"
+    ],
+    "required_note_keywords": [
+      "speed test",
+      "conference room",
+      "ssid",
+      "access point",
+      "time",
+      "escalated"
+    ]
+  },
+  "correct_steps": [
+    "Run or request speed test in the room",
+    "Confirm wired or nearby Wi-Fi works",
+    "Record SSID, time, and room",
+    "Identify AP if known",
+    "Escalate to Network Operations Tier 2"
+  ],
+  "rationale": "Localized wireless slowness likely requires AP/controller review.",
+  "response_deadline_minutes": 30,
+  "partial_groups": {
+    "Network Operations": 0.7
+  },
+  "hints": [],
+  "learning_objectives": [],
+  "tool_clues": {}
+}

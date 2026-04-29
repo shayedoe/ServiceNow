@@ -1,0 +1,57 @@
+{
+  "id": "t2_multiple_printers_offline",
+  "title": "Multiple department printers offline",
+  "tier": 2,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] Multiple printers offline on 3rd floor",
+    "description": "Four callers from the same floor report all department printers offline and not accepting jobs.",
+    "impact": "2",
+    "urgency": "2",
+    "category": "hardware",
+    "subcategory": "monitor",
+    "caller_id": "Training User",
+    "business_service": "Printing",
+    "cmdb_ci": "PRINT-SRV-01"
+  },
+  "expected": {
+    "action": "escalate",
+    "assignment_group": "Desktop Support - Tier 2",
+    "impact": 2,
+    "urgency": 2,
+    "priority": 2,
+    "required_events": [
+      "validate_caller",
+      "check_scope",
+      "check_related_incidents",
+      "set_impact_urgency",
+      "assign_group",
+      "add_work_note",
+      "link_parent"
+    ],
+    "required_note_keywords": [
+      "multiple users",
+      "printer outage",
+      "print server",
+      "floor",
+      "parent incident",
+      "escalated"
+    ]
+  },
+  "correct_steps": [
+    "Check related incidents for duplicate printer reports",
+    "Confirm multiple printers and users are affected",
+    "Check printer/print server status",
+    "Create or link parent incident",
+    "Escalate to Desktop Support Tier 2 with scope and affected printers"
+  ],
+  "rationale": "Multiple related tickets indicate an outage pattern. Do not resolve each individually.",
+  "response_deadline_minutes": 10,
+  "partial_groups": {
+    "Desktop Support": 0.7
+  },
+  "hints": [],
+  "learning_objectives": [],
+  "tool_clues": {
+    "print_server": "Print server queue not responding for PRN-FLOOR3-*."
+  }
+}

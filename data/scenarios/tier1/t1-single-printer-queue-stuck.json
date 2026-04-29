@@ -1,0 +1,55 @@
+{
+  "id": "t1_single_printer_queue_stuck",
+  "title": "Single-user printer queue stuck",
+  "tier": 1,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] User cannot print to department printer",
+    "description": "One caller's jobs stay pending. Other users can print to the same printer.",
+    "impact": "3",
+    "urgency": "3",
+    "category": "hardware",
+    "subcategory": "monitor",
+    "caller_id": "Training User",
+    "business_service": "Printing",
+    "cmdb_ci": "PRN-FIN-02"
+  },
+  "expected": {
+    "action": "resolve",
+    "assignment_group": "Service Desk",
+    "impact": 3,
+    "urgency": 3,
+    "priority": 4,
+    "required_events": [
+      "validate_caller",
+      "check_scope",
+      "set_impact_urgency",
+      "assign_group",
+      "add_work_note",
+      "add_comment"
+    ],
+    "required_note_keywords": [
+      "single user",
+      "queue",
+      "spooler",
+      "test page",
+      "confirmed"
+    ]
+  },
+  "correct_steps": [
+    "Confirm other users can print",
+    "Clear user's print queue",
+    "Restart Print Spooler",
+    "Remove and re-add printer if needed",
+    "Print test page"
+  ],
+  "rationale": "Only one user affected means do not escalate as printer outage. Fix local queue/spooler first.",
+  "response_deadline_minutes": 20,
+  "partial_groups": {
+    "Desktop Support": 0.6
+  },
+  "hints": [],
+  "learning_objectives": [],
+  "tool_clues": {
+    "print_server": "Printer online. Other jobs completing. One user's queue has stuck job."
+  }
+}

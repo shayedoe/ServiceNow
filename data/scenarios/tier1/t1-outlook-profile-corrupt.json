@@ -1,0 +1,56 @@
+{
+  "id": "t1_outlook_profile_corrupt",
+  "title": "Outlook profile corruption",
+  "tier": 1,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] Outlook opens then crashes on startup",
+    "description": "Caller says Outlook closes immediately after opening. Webmail works normally.",
+    "impact": "3",
+    "urgency": "3",
+    "category": "software",
+    "subcategory": "email",
+    "caller_id": "Training User",
+    "business_service": "Email",
+    "cmdb_ci": "OUTLOOK-CLIENT"
+  },
+  "expected": {
+    "action": "resolve",
+    "assignment_group": "Service Desk",
+    "impact": 3,
+    "urgency": 3,
+    "priority": 3,
+    "required_events": [
+      "validate_caller",
+      "check_scope",
+      "set_impact_urgency",
+      "assign_group",
+      "add_work_note",
+      "add_comment"
+    ],
+    "required_note_keywords": [
+      "outlook",
+      "safe mode",
+      "add-ins",
+      "profile",
+      "webmail",
+      "confirmed"
+    ]
+  },
+  "correct_steps": [
+    "Confirm webmail works to isolate to desktop Outlook",
+    "Start Outlook in safe mode",
+    "Disable add-ins",
+    "Recreate mail profile if safe mode works",
+    "Confirm Outlook launches and document"
+  ],
+  "rationale": "Single-user Outlook crash with webmail working is a client-side Tier 1 issue.",
+  "response_deadline_minutes": 20,
+  "partial_groups": {
+    "Application Support": 0.5
+  },
+  "hints": [],
+  "learning_objectives": [],
+  "tool_clues": {
+    "o365": "Service health normal. User mailbox accessible through webmail."
+  }
+}

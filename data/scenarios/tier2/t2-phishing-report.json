@@ -1,0 +1,54 @@
+{
+  "id": "t2_phishing_report",
+  "title": "Reported phishing email",
+  "tier": 2,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] User reports suspicious email with attachment",
+    "description": "Caller received an email claiming to be payroll with an HTML attachment. They did not open it.",
+    "impact": "2",
+    "urgency": "2",
+    "category": "inquiry",
+    "subcategory": "email",
+    "caller_id": "Training User",
+    "business_service": "Email Security",
+    "cmdb_ci": "O365-DEFENDER"
+  },
+  "expected": {
+    "action": "escalate",
+    "assignment_group": "Security Operations",
+    "impact": 2,
+    "urgency": 2,
+    "priority": 2,
+    "required_events": [
+      "validate_caller",
+      "check_scope",
+      "assign_group",
+      "add_work_note",
+      "add_comment"
+    ],
+    "required_note_keywords": [
+      "phishing",
+      "sender",
+      "subject",
+      "headers",
+      "attachment",
+      "do not open",
+      "security"
+    ]
+  },
+  "correct_steps": [
+    "Tell user not to open or forward attachment externally",
+    "Collect sender, subject, received time, and headers if available",
+    "Search for other reports if tool exists",
+    "Escalate to Security Operations",
+    "Send caller safe-handling comment"
+  ],
+  "rationale": "Phishing reports belong to Security Operations. Help desk collects headers and containment facts.",
+  "response_deadline_minutes": 10,
+  "partial_groups": {
+    "Service Desk": 0.5
+  },
+  "hints": [],
+  "learning_objectives": [],
+  "tool_clues": {}
+}

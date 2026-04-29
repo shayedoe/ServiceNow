@@ -1,0 +1,54 @@
+{
+  "id": "t2_intune_app_install_failed",
+  "title": "Intune app install failure",
+  "tier": 2,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] Required app failed to install through Company Portal",
+    "description": "User needs a required app. Company Portal shows installation failed with error 0x87D1041C.",
+    "impact": "3",
+    "urgency": "2",
+    "category": "software",
+    "subcategory": "operating_system",
+    "caller_id": "Training User",
+    "business_service": "Endpoint Management",
+    "cmdb_ci": "INTUNE-APP-DEPLOY"
+  },
+  "expected": {
+    "action": "escalate",
+    "assignment_group": "Endpoint Engineering",
+    "impact": 3,
+    "urgency": 2,
+    "priority": 3,
+    "required_events": [
+      "validate_caller",
+      "check_scope",
+      "check_related_incidents",
+      "set_impact_urgency",
+      "assign_group",
+      "add_work_note"
+    ],
+    "required_note_keywords": [
+      "intune",
+      "company portal",
+      "error code",
+      "sync",
+      "logs",
+      "escalated"
+    ]
+  },
+  "correct_steps": [
+    "Confirm user is licensed and device is enrolled",
+    "Sync device from Company Portal",
+    "Record exact error code",
+    "Collect IntuneManagementExtension logs if available",
+    "Escalate to Endpoint Engineering"
+  ],
+  "rationale": "Persistent Intune package failure after basic sync usually requires package/policy review.",
+  "response_deadline_minutes": 30,
+  "partial_groups": {
+    "Desktop Support": 0.7
+  },
+  "hints": [],
+  "learning_objectives": [],
+  "tool_clues": {}
+}

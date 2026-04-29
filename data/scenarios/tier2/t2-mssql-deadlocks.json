@@ -1,0 +1,54 @@
+{
+  "id": "t2_mssql_deadlocks",
+  "title": "MS SQL deadlocks in business app",
+  "tier": 2,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] Business app intermittently fails saving records",
+    "description": "Several users report save failures in the inventory app. Error mentions SQL deadlock victim.",
+    "impact": "2",
+    "urgency": "2",
+    "category": "database",
+    "subcategory": "mssql",
+    "caller_id": "Training User",
+    "business_service": "Inventory App",
+    "cmdb_ci": "MSSQL-INV-PROD"
+  },
+  "expected": {
+    "action": "escalate",
+    "assignment_group": "Database Administration",
+    "impact": 2,
+    "urgency": 2,
+    "priority": 2,
+    "required_events": [
+      "validate_caller",
+      "check_scope",
+      "check_related_incidents",
+      "set_impact_urgency",
+      "assign_group",
+      "add_work_note"
+    ],
+    "required_note_keywords": [
+      "sql",
+      "deadlock",
+      "timestamp",
+      "affected users",
+      "database",
+      "escalated"
+    ]
+  },
+  "correct_steps": [
+    "Confirm multiple users and exact module",
+    "Capture full error and timestamp",
+    "Identify app/database if known",
+    "Check related incidents",
+    "Escalate to DBA with affected records and times"
+  ],
+  "rationale": "SQL deadlocks are database/application-side issues; help desk collects evidence.",
+  "response_deadline_minutes": 15,
+  "partial_groups": {
+    "Application Support": 0.6
+  },
+  "hints": [],
+  "learning_objectives": [],
+  "tool_clues": {}
+}

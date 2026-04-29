@@ -1,0 +1,54 @@
+{
+  "id": "t1_mouse_keyboard_dock",
+  "title": "Keyboard and mouse not working through dock",
+  "tier": 1,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] Keyboard and mouse not working at desk",
+    "description": "USB keyboard and mouse do not respond when plugged into the docking station, but laptop keyboard works.",
+    "impact": "3",
+    "urgency": "3",
+    "category": "hardware",
+    "subcategory": "keyboard",
+    "caller_id": "Training User",
+    "business_service": "Endpoint",
+    "cmdb_ci": "DOCK-TRAIN-08"
+  },
+  "expected": {
+    "action": "resolve",
+    "assignment_group": "Desktop Support",
+    "impact": 3,
+    "urgency": 3,
+    "priority": 4,
+    "required_events": [
+      "validate_caller",
+      "check_scope",
+      "set_impact_urgency",
+      "assign_group",
+      "add_work_note",
+      "add_comment"
+    ],
+    "required_note_keywords": [
+      "dock",
+      "usb",
+      "reseat",
+      "power cycle",
+      "direct laptop",
+      "confirmed"
+    ]
+  },
+  "correct_steps": [
+    "Test keyboard/mouse directly on laptop",
+    "Power-cycle dock",
+    "Reseat USB-C/Thunderbolt cable",
+    "Try another dock port",
+    "Document whether dock replacement is needed"
+  ],
+  "rationale": "Peripheral failure through a dock is endpoint hardware support, not network.",
+  "response_deadline_minutes": 30,
+  "partial_groups": {
+    "Service Desk": 0.6
+  },
+  "hints": [],
+  "learning_objectives": [],
+  "tool_clues": {}
+}

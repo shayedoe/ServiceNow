@@ -1,0 +1,53 @@
+{
+  "id": "t1_dns_cache_single_site",
+  "title": "Single-user DNS cache issue",
+  "tier": 1,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] Internal site will not load for one user",
+    "description": "Caller cannot reach intranet.company.local. Other internal sites work and coworkers can access the page.",
+    "impact": "3",
+    "urgency": "3",
+    "category": "network",
+    "subcategory": "dns",
+    "caller_id": "Training User",
+    "business_service": "Intranet",
+    "cmdb_ci": "WEB-INTRANET-01"
+  },
+  "expected": {
+    "action": "resolve",
+    "assignment_group": "Service Desk",
+    "impact": 3,
+    "urgency": 3,
+    "priority": 3,
+    "required_events": [
+      "validate_caller",
+      "check_scope",
+      "set_impact_urgency",
+      "assign_group",
+      "add_work_note",
+      "add_comment"
+    ],
+    "required_note_keywords": [
+      "dns",
+      "nslookup",
+      "flushdns",
+      "browser cache",
+      "confirmed"
+    ]
+  },
+  "correct_steps": [
+    "Confirm scope is one user",
+    "Run nslookup for the site",
+    "Flush DNS cache",
+    "Clear browser cache or test another browser",
+    "Confirm site loads"
+  ],
+  "rationale": "One user with one internal site failing should be handled as local DNS/browser cache before Network Ops.",
+  "response_deadline_minutes": 20,
+  "partial_groups": {
+    "Network Operations": 0.5
+  },
+  "hints": [],
+  "learning_objectives": [],
+  "tool_clues": {}
+}

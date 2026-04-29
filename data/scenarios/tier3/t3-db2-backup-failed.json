@@ -1,0 +1,52 @@
+{
+  "id": "t3_db2_backup_failed",
+  "title": "DB2 backup failure",
+  "tier": 3,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] DB2 production backup failed overnight",
+    "description": "Monitoring alert says DB2 nightly backup failed for production billing database.",
+    "impact": "1",
+    "urgency": "2",
+    "category": "database",
+    "subcategory": "db2",
+    "caller_id": "Training User",
+    "business_service": "Billing Database",
+    "cmdb_ci": "DB2-BILL-PROD"
+  },
+  "expected": {
+    "action": "escalate",
+    "assignment_group": "Database Administration",
+    "impact": 1,
+    "urgency": 2,
+    "priority": 2,
+    "required_events": [
+      "check_scope",
+      "set_impact_urgency",
+      "assign_group",
+      "add_work_note"
+    ],
+    "required_note_keywords": [
+      "db2",
+      "backup failed",
+      "production",
+      "monitoring alert",
+      "job log",
+      "dba"
+    ]
+  },
+  "correct_steps": [
+    "Record exact alert and database name",
+    "Check whether last good backup exists if dashboard is available",
+    "Capture backup job log/error",
+    "Assess business criticality",
+    "Escalate to DBA immediately"
+  ],
+  "rationale": "Production database backup failure is not a user incident fix. It must route to DBAs quickly.",
+  "response_deadline_minutes": 10,
+  "partial_groups": {
+    "Application Support": 0.5
+  },
+  "hints": [],
+  "learning_objectives": [],
+  "tool_clues": {}
+}

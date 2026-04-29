@@ -1,0 +1,55 @@
+{
+  "id": "t3_ransomware_suspected",
+  "title": "Suspected ransomware encryption",
+  "tier": 3,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] Files renamed with strange extension on shared drive",
+    "description": "User reports many shared files now end in .locked and ransom note text files appeared in the folder.",
+    "impact": "1",
+    "urgency": "1",
+    "category": "inquiry",
+    "subcategory": "antivirus",
+    "caller_id": "Training User",
+    "business_service": "Security Incident Response",
+    "cmdb_ci": "FS-SHARE-ROOT"
+  },
+  "expected": {
+    "action": "escalate",
+    "assignment_group": "Security Operations",
+    "impact": 1,
+    "urgency": 1,
+    "priority": 1,
+    "required_events": [
+      "validate_caller",
+      "check_scope",
+      "set_impact_urgency",
+      "assign_group",
+      "add_work_note",
+      "add_comment"
+    ],
+    "required_note_keywords": [
+      "ransomware",
+      "isolate",
+      "shared drive",
+      "do not reboot",
+      "security",
+      "p1",
+      "escalated"
+    ]
+  },
+  "correct_steps": [
+    "Tell user to stop activity and do not delete evidence",
+    "Identify affected machine, share path, and time noticed",
+    "Isolate endpoint from network if policy/tool allows",
+    "Escalate immediately to Security Operations as P1",
+    "Notify caller that security team will follow up"
+  ],
+  "rationale": "Possible ransomware is a security incident. Speed and preservation matter more than normal troubleshooting.",
+  "response_deadline_minutes": 5,
+  "partial_groups": {
+    "Service Desk": 0.3
+  },
+  "hints": [],
+  "learning_objectives": [],
+  "tool_clues": {}
+}

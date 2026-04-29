@@ -1,0 +1,55 @@
+{
+  "id": "t3_kerberos_spn_failure",
+  "title": "Kerberos SPN failure across apps",
+  "tier": 3,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] Service account authentication failures across multiple apps",
+    "description": "Several internal apps fail Kerberos authentication after a domain controller maintenance window.",
+    "impact": "1",
+    "urgency": "1",
+    "category": "software",
+    "subcategory": "internal_application",
+    "caller_id": "Training User",
+    "business_service": "Identity",
+    "cmdb_ci": "AD-DOMAIN"
+  },
+  "expected": {
+    "action": "escalate",
+    "assignment_group": "Identity Engineering",
+    "impact": 1,
+    "urgency": 1,
+    "priority": 1,
+    "required_events": [
+      "validate_caller",
+      "check_scope",
+      "check_related_incidents",
+      "set_impact_urgency",
+      "assign_group",
+      "add_work_note"
+    ],
+    "required_note_keywords": [
+      "kerberos",
+      "spn",
+      "service account",
+      "domain controller",
+      "klist",
+      "event logs",
+      "p1"
+    ]
+  },
+  "correct_steps": [
+    "Collect affected app names and service account",
+    "Capture klist output or event log errors",
+    "Confirm maintenance/change window",
+    "Check related incidents across apps",
+    "Escalate P1 to Identity Engineering"
+  ],
+  "rationale": "Cross-application Kerberos failure after DC maintenance is identity infrastructure, not a single app issue.",
+  "response_deadline_minutes": 10,
+  "partial_groups": {
+    "Identity & Access Management": 0.7
+  },
+  "hints": [],
+  "learning_objectives": [],
+  "tool_clues": {}
+}

@@ -1,0 +1,55 @@
+{
+  "id": "t3_packet_loss_datacenter",
+  "title": "Intermittent packet loss to data center",
+  "tier": 3,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] Packet loss to primary data center",
+    "description": "App teams report 3-6% packet loss from multiple office VLANs to the primary data center during peak hours.",
+    "impact": "1",
+    "urgency": "2",
+    "category": "network",
+    "subcategory": "ip_address",
+    "caller_id": "Training User",
+    "business_service": "Core Network",
+    "cmdb_ci": "WAN-EDGE-01"
+  },
+  "expected": {
+    "action": "escalate",
+    "assignment_group": "Network Engineering - Tier 3",
+    "impact": 1,
+    "urgency": 2,
+    "priority": 2,
+    "required_events": [
+      "validate_caller",
+      "check_scope",
+      "check_related_incidents",
+      "set_impact_urgency",
+      "assign_group",
+      "add_work_note"
+    ],
+    "required_note_keywords": [
+      "packet loss",
+      "mtr",
+      "traceroute",
+      "vlan",
+      "interface counters",
+      "change",
+      "tier 3"
+    ]
+  },
+  "correct_steps": [
+    "Collect source VLANs and destination IPs",
+    "Run MTR/traceroute from multiple networks",
+    "Check recent network changes",
+    "Record packet loss percentage and times",
+    "Escalate to Network Engineering Tier 3"
+  ],
+  "rationale": "Multi-segment packet loss requires routing/interface investigation by senior network engineering.",
+  "response_deadline_minutes": 10,
+  "partial_groups": {
+    "Network Operations - Tier 2": 0.7
+  },
+  "hints": [],
+  "learning_objectives": [],
+  "tool_clues": {}
+}

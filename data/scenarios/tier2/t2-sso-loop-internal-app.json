@@ -1,0 +1,55 @@
+{
+  "id": "t2_sso_loop_internal_app",
+  "title": "SSO redirect loop for internal app",
+  "tier": 2,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] Internal app stuck in login loop",
+    "description": "User can access email and Windows, but the HR portal redirects back to login repeatedly.",
+    "impact": "2",
+    "urgency": "2",
+    "category": "inquiry",
+    "subcategory": "internal_application",
+    "caller_id": "Training User",
+    "business_service": "HR Portal",
+    "cmdb_ci": "APP-HR-SSO"
+  },
+  "expected": {
+    "action": "escalate",
+    "assignment_group": "Identity & Access Management",
+    "impact": 2,
+    "urgency": 2,
+    "priority": 2,
+    "required_events": [
+      "validate_caller",
+      "check_scope",
+      "check_related_incidents",
+      "set_impact_urgency",
+      "assign_group",
+      "add_work_note"
+    ],
+    "required_note_keywords": [
+      "sso",
+      "redirect loop",
+      "hr portal",
+      "browser",
+      "saml",
+      "timestamp",
+      "escalated"
+    ]
+  },
+  "correct_steps": [
+    "Confirm issue in private browser or another device",
+    "Check whether other users are affected",
+    "Capture timestamp and username",
+    "Collect screenshot of redirect loop",
+    "Escalate to IAM with app name and SSO evidence"
+  ],
+  "rationale": "SSO loops usually require IAM/app SAML configuration review, not local password reset.",
+  "response_deadline_minutes": 20,
+  "partial_groups": {
+    "Application Support": 0.6
+  },
+  "hints": [],
+  "learning_objectives": [],
+  "tool_clues": {}
+}

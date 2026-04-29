@@ -1,0 +1,54 @@
+{
+  "id": "t3_oracle_replication_lag",
+  "title": "Oracle replication lag",
+  "tier": 3,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] Oracle reporting data is hours behind",
+    "description": "Finance reporting data is 4 hours stale during close. Application is up, but reports show old numbers.",
+    "impact": "1",
+    "urgency": "2",
+    "category": "database",
+    "subcategory": "oracle",
+    "caller_id": "Training User",
+    "business_service": "Finance Reporting",
+    "cmdb_ci": "ORACLE-FIN-REPL"
+  },
+  "expected": {
+    "action": "escalate",
+    "assignment_group": "Database Administration",
+    "impact": 1,
+    "urgency": 2,
+    "priority": 2,
+    "required_events": [
+      "validate_caller",
+      "check_scope",
+      "check_related_incidents",
+      "set_impact_urgency",
+      "assign_group",
+      "add_work_note"
+    ],
+    "required_note_keywords": [
+      "oracle",
+      "replication lag",
+      "finance close",
+      "timestamp",
+      "database",
+      "p2"
+    ]
+  },
+  "correct_steps": [
+    "Confirm reports are stale and app is otherwise up",
+    "Capture last updated timestamp",
+    "Identify database or report name",
+    "Check related incidents",
+    "Escalate to DBA as P2/P1 depending business deadline"
+  ],
+  "rationale": "Replication lag is a database platform problem. Help desk should not close as user error.",
+  "response_deadline_minutes": 10,
+  "partial_groups": {
+    "Application Support": 0.6
+  },
+  "hints": [],
+  "learning_objectives": [],
+  "tool_clues": {}
+}

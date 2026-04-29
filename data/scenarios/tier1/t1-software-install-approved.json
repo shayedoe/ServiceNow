@@ -1,0 +1,52 @@
+{
+  "id": "t1_software_install_approved",
+  "title": "Approved software install",
+  "tier": 1,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] Approved software install request",
+    "description": "User needs approved PDF editor installed. Manager approval and license are already attached.",
+    "impact": "3",
+    "urgency": "3",
+    "category": "software",
+    "subcategory": "operating_system",
+    "caller_id": "Training User",
+    "business_service": "Endpoint",
+    "cmdb_ci": "INTUNE-APP-PDF"
+  },
+  "expected": {
+    "action": "resolve",
+    "assignment_group": "Service Desk",
+    "impact": 3,
+    "urgency": 3,
+    "priority": 5,
+    "required_events": [
+      "validate_caller",
+      "check_scope",
+      "assign_group",
+      "add_work_note",
+      "add_comment"
+    ],
+    "required_note_keywords": [
+      "approval",
+      "license",
+      "software center",
+      "install",
+      "confirmed"
+    ]
+  },
+  "correct_steps": [
+    "Verify request and approval",
+    "Confirm license entitlement",
+    "Install through Software Center or Intune Company Portal",
+    "Confirm launch and activation",
+    "Document approval reference"
+  ],
+  "rationale": "Approved software fulfillment is lower priority and should be resolved without escalation if package exists.",
+  "response_deadline_minutes": 60,
+  "partial_groups": {
+    "Desktop Support": 0.5
+  },
+  "hints": [],
+  "learning_objectives": [],
+  "tool_clues": {}
+}

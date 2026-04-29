@@ -1,0 +1,201 @@
+{
+  "triage_flow": [
+    {
+      "step": 1,
+      "name": "Validate caller and contact method",
+      "questions": [
+        "Who is affected?",
+        "What is the callback number?",
+        "Is the caller authorized for this request?"
+      ]
+    },
+    {
+      "step": 2,
+      "name": "Confirm scope",
+      "questions": [
+        "One user, one device, one location, or many?",
+        "Is there a duplicate incident pattern?",
+        "Can the issue be reproduced?"
+      ]
+    },
+    {
+      "step": 3,
+      "name": "Classify correctly",
+      "questions": [
+        "Incident vs request?",
+        "Correct category/subcategory?",
+        "Relevant service and CI?"
+      ]
+    },
+    {
+      "step": 4,
+      "name": "Set impact, urgency, priority",
+      "questions": [
+        "How many users or services are affected?",
+        "Is a business-critical process stopped?",
+        "Is there a security risk?"
+      ]
+    },
+    {
+      "step": 5,
+      "name": "Troubleshoot or escalate",
+      "questions": [
+        "Is this known Tier 1 work?",
+        "What evidence does the next team need?",
+        "Did you add clear work notes?"
+      ]
+    },
+    {
+      "step": 6,
+      "name": "Communicate and close",
+      "questions": [
+        "Was the caller updated?",
+        "Is the fix verified?",
+        "Does the resolution note state cause, action, and confirmation?"
+      ]
+    }
+  ],
+  "priority_matrix": [
+    {
+      "priority": "1 - Critical",
+      "impact": "High",
+      "urgency": "High",
+      "use_when": "Major outage, security incident, production service down, patient/finance/business-critical service stopped"
+    },
+    {
+      "priority": "2 - High",
+      "impact": "High or Medium",
+      "urgency": "High or Medium",
+      "use_when": "Multiple users affected, degraded critical service, major VIP/business deadline risk"
+    },
+    {
+      "priority": "3 - Moderate",
+      "impact": "Low",
+      "urgency": "Low/Medium",
+      "use_when": "Single user cannot work, account lockout, standard access issue"
+    },
+    {
+      "priority": "4 - Low",
+      "impact": "Low",
+      "urgency": "Low",
+      "use_when": "Single-user workaround exists, peripheral issue, non-urgent hardware/software problem"
+    },
+    {
+      "priority": "5 - Planning",
+      "impact": "Low",
+      "urgency": "Low",
+      "use_when": "Approved install, how-to, request/fulfillment, scheduled non-break/fix work"
+    }
+  ],
+  "routing_matrix": [
+    {
+      "category": "password_reset",
+      "subcategory": "",
+      "group": "Service Desk",
+      "route_when": "Normal account unlock/password reset after identity verification",
+      "escalate_when": "VIP compromise, impossible travel, lost MFA token, suspicious activity"
+    },
+    {
+      "category": "software",
+      "subcategory": "email",
+      "group": "Service Desk",
+      "route_when": "Outlook client issue, one mailbox, profile/add-in problem",
+      "escalate_when": "Mail flow delay, multiple users, Exchange/O365 service health issue",
+      "escalation_group": "Messaging Engineering"
+    },
+    {
+      "category": "software",
+      "subcategory": "operating_system",
+      "group": "Desktop Support",
+      "route_when": "Windows update, disk space, driver, local OS issue",
+      "escalate_when": "Fleet-wide BSOD, Intune/SCCM package issue",
+      "escalation_group": "Endpoint Engineering"
+    },
+    {
+      "category": "hardware",
+      "subcategory": "keyboard/mouse/monitor/disk/memory/cpu",
+      "group": "Desktop Support",
+      "route_when": "Single endpoint or peripheral hardware issue",
+      "escalate_when": "Multiple devices after update, warranty replacement, repeated failures",
+      "escalation_group": "Desktop Support - Tier 2"
+    },
+    {
+      "category": "network",
+      "subcategory": "wireless",
+      "group": "Service Desk",
+      "route_when": "Single-user Wi-Fi profile or credential issue",
+      "escalate_when": "Many users, floor/room outage, AP issue",
+      "escalation_group": "Network Operations"
+    },
+    {
+      "category": "network",
+      "subcategory": "vpn",
+      "group": "Service Desk",
+      "route_when": "Single-user VPN profile/client issue",
+      "escalate_when": "Multiple remote users, gateway/client update issue",
+      "escalation_group": "Network Operations - Tier 2"
+    },
+    {
+      "category": "network",
+      "subcategory": "dhcp/dns/ip_address",
+      "group": "Network Operations",
+      "route_when": "Multi-user network addressing/name resolution issue",
+      "escalate_when": "Routing, packet loss, data center, firewall, WAN issue",
+      "escalation_group": "Network Engineering - Tier 3"
+    },
+    {
+      "category": "database",
+      "subcategory": "mssql/oracle/db2",
+      "group": "Database Administration",
+      "route_when": "Query timeout, backup failure, replication lag, DB alert",
+      "escalate_when": "Application code defect plus DB symptom",
+      "escalation_group": "Application Support + DBA"
+    },
+    {
+      "category": "inquiry",
+      "subcategory": "antivirus",
+      "group": "Service Desk",
+      "route_when": "One endpoint has stale definitions or scan needed",
+      "escalate_when": "Malware, ransomware, multiple endpoints, suspicious encryption",
+      "escalation_group": "Security Operations"
+    },
+    {
+      "category": "inquiry",
+      "subcategory": "internal_application",
+      "group": "Application Support",
+      "route_when": "Known app issue or user-specific app troubleshooting",
+      "escalate_when": "HTTP 500, SSO/SAML, workflow break, production release regression",
+      "escalation_group": "Specific app team/IAM/ServiceNow Platform Team"
+    }
+  ],
+  "work_note_templates": {
+    "initial_triage": "Validated caller: <method>. Scope: <one user/device/location or multiple>. Symptoms: <exact error>. Business impact: <impact>. Troubleshooting started: <steps>.",
+    "tier1_resolution": "Resolved by <action>. Verified with caller by <test/result>. No further impact reported. Caller notified.",
+    "escalation": "Escalating to <group>. Evidence collected: <screenshots/logs/timestamps/users/devices>. Scope: <scope>. Impact/Urgency/Priority set to <values>. Related incidents checked: <yes/no>.",
+    "outage_parent": "Potential outage identified. Similar incidents: <INC list>. Parent incident created/linked: <parent>. Affected service/CI: <service/CI>. Next team: <group>.",
+    "security": "Security-sensitive report. Caller instructed to stop interaction and preserve evidence. Details captured: sender/file/path/device/time. Escalated to Security Operations."
+  },
+  "customer_comment_templates": {
+    "acknowledge": "We received your ticket and are reviewing the issue. I will update you when we have the next step or resolution.",
+    "need_info": "I need one more detail to continue: <specific detail>. Please reply when available.",
+    "resolved": "This should now be resolved. Please test again and reply if the issue continues.",
+    "escalated": "This has been escalated to the appropriate support team because it appears to require additional access or investigation."
+  },
+  "escalation_triggers": [
+    "Three or more tickets with the same short description or same service/CI",
+    "Multiple users, rooms, floors, departments, or locations affected",
+    "Security concern: phishing, malware, ransomware, lost MFA token, suspicious login",
+    "Production database, ERP, email, VPN, network, or identity service degraded",
+    "HTTP 500, SQL deadlock, Kerberos/SPN, packet loss, DHCP scope exhaustion",
+    "A recent change, deployment, update, or maintenance window lines up with symptoms",
+    "Tier 1 fix attempted but issue persists and logs/error codes are collected"
+  ],
+  "closure_checklist": [
+    "Caller validated where required",
+    "Impact, urgency, and priority match scope",
+    "Category/subcategory and assignment group are correct",
+    "Work note includes symptoms, evidence, actions, and outcome",
+    "Caller comment is plain and not overly technical",
+    "Resolution note says what was fixed and how it was verified"
+  ]
+}

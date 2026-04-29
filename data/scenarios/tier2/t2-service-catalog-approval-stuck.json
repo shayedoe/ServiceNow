@@ -1,0 +1,53 @@
+{
+  "id": "t2_service_catalog_approval_stuck",
+  "title": "Service catalog approval stuck",
+  "tier": 2,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] Service request approval stuck",
+    "description": "Manager approved a laptop request, but status still shows Waiting for Approval after 24 hours.",
+    "impact": "3",
+    "urgency": "3",
+    "category": "inquiry",
+    "subcategory": "internal_application",
+    "caller_id": "Training User",
+    "business_service": "ServiceNow",
+    "cmdb_ci": "REQ-WORKFLOW"
+  },
+  "expected": {
+    "action": "escalate",
+    "assignment_group": "ServiceNow Platform Team",
+    "impact": 3,
+    "urgency": 3,
+    "priority": 4,
+    "required_events": [
+      "validate_caller",
+      "check_scope",
+      "assign_group",
+      "add_work_note",
+      "add_comment"
+    ],
+    "required_note_keywords": [
+      "request number",
+      "approval",
+      "workflow",
+      "stuck",
+      "catalog",
+      "escalated"
+    ]
+  },
+  "correct_steps": [
+    "Collect request number and approver name",
+    "Confirm approval timestamp",
+    "Check whether workflow moved to fulfillment",
+    "Document expected vs actual state",
+    "Escalate to ServiceNow Platform Team"
+  ],
+  "rationale": "Broken workflow state is platform/configuration work, not desktop support.",
+  "response_deadline_minutes": 60,
+  "partial_groups": {
+    "Service Desk": 0.5
+  },
+  "hints": [],
+  "learning_objectives": [],
+  "tool_clues": {}
+}

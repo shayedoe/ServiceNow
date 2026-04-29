@@ -1,0 +1,56 @@
+{
+  "id": "t2_dhcp_scope_exhausted",
+  "title": "DHCP scope exhaustion",
+  "tier": 2,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] New devices cannot get IP addresses",
+    "description": "Several users in training room get 169.254.x.x addresses. Existing users on the same Wi-Fi still work.",
+    "impact": "2",
+    "urgency": "2",
+    "category": "network",
+    "subcategory": "dhcp",
+    "caller_id": "Training User",
+    "business_service": "Network Access",
+    "cmdb_ci": "DHCP-SCOPE-TRAINING"
+  },
+  "expected": {
+    "action": "escalate",
+    "assignment_group": "Network Operations",
+    "impact": 2,
+    "urgency": 2,
+    "priority": 2,
+    "required_events": [
+      "validate_caller",
+      "check_scope",
+      "check_related_incidents",
+      "set_impact_urgency",
+      "assign_group",
+      "add_work_note"
+    ],
+    "required_note_keywords": [
+      "dhcp",
+      "169.254",
+      "scope",
+      "lease",
+      "vlan",
+      "escalated"
+    ]
+  },
+  "correct_steps": [
+    "Confirm APIPA address on affected machines",
+    "Check if existing devices still have leases",
+    "Record VLAN/SSID/room",
+    "Check DHCP scope utilization if tool is available",
+    "Escalate to Network Operations"
+  ],
+  "rationale": "APIPA on multiple new devices points to DHCP scope exhaustion or relay issue.",
+  "response_deadline_minutes": 15,
+  "partial_groups": {
+    "Service Desk": 0.5
+  },
+  "hints": [],
+  "learning_objectives": [],
+  "tool_clues": {
+    "dhcp": "Scope TRAINING-VLAN has 0 available addresses."
+  }
+}

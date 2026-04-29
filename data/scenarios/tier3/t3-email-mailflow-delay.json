@@ -1,0 +1,56 @@
+{
+  "id": "t3_email_mailflow_delay",
+  "title": "Organization-wide email delivery delay",
+  "tier": 3,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] External email delayed for many users",
+    "description": "Multiple departments report external emails arriving 45-90 minutes late. Internal email is normal.",
+    "impact": "1",
+    "urgency": "2",
+    "category": "software",
+    "subcategory": "email",
+    "caller_id": "Training User",
+    "business_service": "Email",
+    "cmdb_ci": "EXCHANGE-O365"
+  },
+  "expected": {
+    "action": "escalate",
+    "assignment_group": "Messaging Engineering",
+    "impact": 1,
+    "urgency": 2,
+    "priority": 2,
+    "required_events": [
+      "validate_caller",
+      "check_scope",
+      "check_related_incidents",
+      "set_impact_urgency",
+      "assign_group",
+      "add_work_note",
+      "link_parent"
+    ],
+    "required_note_keywords": [
+      "mail flow",
+      "external",
+      "delayed",
+      "message trace",
+      "multiple departments",
+      "parent",
+      "escalated"
+    ]
+  },
+  "correct_steps": [
+    "Confirm internal vs external scope",
+    "Collect sender, recipient, subject, and timestamps",
+    "Check related incidents and create/link parent",
+    "Run or request message trace",
+    "Escalate to Messaging Engineering"
+  ],
+  "rationale": "Org-wide external mail delay is mail flow infrastructure, not an Outlook profile issue.",
+  "response_deadline_minutes": 10,
+  "partial_groups": {
+    "Application Support": 0.5
+  },
+  "hints": [],
+  "learning_objectives": [],
+  "tool_clues": {}
+}

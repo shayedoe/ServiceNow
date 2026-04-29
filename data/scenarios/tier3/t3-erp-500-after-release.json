@@ -1,0 +1,56 @@
+{
+  "id": "t3_erp_500_after_release",
+  "title": "ERP HTTP 500 after release",
+  "tier": 3,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] ERP returns HTTP 500 after morning release",
+    "description": "Purchase order submission fails for all buyers after a scheduled ERP release.",
+    "impact": "1",
+    "urgency": "2",
+    "category": "inquiry",
+    "subcategory": "internal_application",
+    "caller_id": "Training User",
+    "business_service": "ERP",
+    "cmdb_ci": "APP-ERP-PROD"
+  },
+  "expected": {
+    "action": "escalate",
+    "assignment_group": "ERP Application Team",
+    "impact": 1,
+    "urgency": 2,
+    "priority": 2,
+    "required_events": [
+      "validate_caller",
+      "check_scope",
+      "check_related_incidents",
+      "set_impact_urgency",
+      "assign_group",
+      "add_work_note",
+      "link_parent"
+    ],
+    "required_note_keywords": [
+      "http 500",
+      "erp",
+      "release",
+      "timestamp",
+      "all buyers",
+      "har",
+      "escalated"
+    ]
+  },
+  "correct_steps": [
+    "Confirm all buyers or multiple users affected",
+    "Capture screenshot and timestamp",
+    "Collect HAR file if possible",
+    "Check release/change ticket",
+    "Escalate to ERP Application Team and link parent incident"
+  ],
+  "rationale": "HTTP 500 for multiple users after a release is server-side application failure.",
+  "response_deadline_minutes": 10,
+  "partial_groups": {
+    "Application Support": 0.7
+  },
+  "hints": [],
+  "learning_objectives": [],
+  "tool_clues": {}
+}

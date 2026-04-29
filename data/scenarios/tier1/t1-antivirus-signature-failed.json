@@ -1,0 +1,54 @@
+{
+  "id": "t1_antivirus_signature_failed",
+  "title": "Antivirus update failed on one laptop",
+  "tier": 1,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] Antivirus signatures out of date",
+    "description": "Security tray icon says antivirus definitions are 9 days old on one user's laptop. No malware symptoms reported.",
+    "impact": "3",
+    "urgency": "3",
+    "category": "inquiry",
+    "subcategory": "antivirus",
+    "caller_id": "Training User",
+    "business_service": "Endpoint Security",
+    "cmdb_ci": "AV-CLIENT"
+  },
+  "expected": {
+    "action": "resolve",
+    "assignment_group": "Service Desk",
+    "impact": 3,
+    "urgency": 3,
+    "priority": 3,
+    "required_events": [
+      "validate_caller",
+      "check_scope",
+      "set_impact_urgency",
+      "assign_group",
+      "add_work_note",
+      "add_comment"
+    ],
+    "required_note_keywords": [
+      "definitions",
+      "update",
+      "endpoint",
+      "reboot",
+      "full scan",
+      "confirmed"
+    ]
+  },
+  "correct_steps": [
+    "Confirm device is online and managed",
+    "Trigger antivirus definition update",
+    "Restart endpoint protection service or reboot",
+    "Run quick scan if required",
+    "Confirm status is healthy"
+  ],
+  "rationale": "One endpoint with stale definitions can be remediated by Tier 1. Escalate only if update fails across many devices.",
+  "response_deadline_minutes": 20,
+  "partial_groups": {
+    "Security Operations": 0.5
+  },
+  "hints": [],
+  "learning_objectives": [],
+  "tool_clues": {}
+}

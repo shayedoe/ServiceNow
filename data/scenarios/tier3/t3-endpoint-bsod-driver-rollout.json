@@ -1,0 +1,54 @@
+{
+  "id": "t3_endpoint_bsod_driver_rollout",
+  "title": "Driver rollout causing BSOD",
+  "tier": 3,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] Multiple workstations BSOD after graphics driver update",
+    "description": "Engineering users report DPC_WATCHDOG_VIOLATION after a driver update deployed yesterday.",
+    "impact": "1",
+    "urgency": "2",
+    "category": "software",
+    "subcategory": "operating_system",
+    "caller_id": "Training User",
+    "business_service": "Endpoint Management",
+    "cmdb_ci": "SCCM-GPU-DRIVER"
+  },
+  "expected": {
+    "action": "escalate",
+    "assignment_group": "Endpoint Engineering",
+    "impact": 1,
+    "urgency": 2,
+    "priority": 2,
+    "required_events": [
+      "validate_caller",
+      "check_scope",
+      "check_related_incidents",
+      "set_impact_urgency",
+      "assign_group",
+      "add_work_note"
+    ],
+    "required_note_keywords": [
+      "bsod",
+      "minidump",
+      "driver",
+      "rollback",
+      "deployment",
+      "endpoint engineering"
+    ]
+  },
+  "correct_steps": [
+    "Collect affected machine names",
+    "Capture stop code and minidumps",
+    "Identify recently deployed driver/package",
+    "Confirm pattern across multiple devices",
+    "Escalate to Endpoint Engineering with rollback recommendation"
+  ],
+  "rationale": "Fleet-level BSOD after deployment requires endpoint engineering package rollback or remediation.",
+  "response_deadline_minutes": 10,
+  "partial_groups": {
+    "Desktop Support - Tier 2": 0.7
+  },
+  "hints": [],
+  "learning_objectives": [],
+  "tool_clues": {}
+}

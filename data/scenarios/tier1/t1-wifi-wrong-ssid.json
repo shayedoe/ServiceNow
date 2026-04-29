@@ -1,0 +1,56 @@
+{
+  "id": "t1_wifi_wrong_ssid",
+  "title": "Wrong Wi-Fi profile selected",
+  "tier": 1,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] Laptop cannot connect to office Wi-Fi",
+    "description": "Caller returned from travel and their laptop keeps joining Guest Wi-Fi instead of the corporate SSID.",
+    "impact": "3",
+    "urgency": "3",
+    "category": "network",
+    "subcategory": "wireless",
+    "caller_id": "Training User",
+    "business_service": "Network Access",
+    "cmdb_ci": "WIFI-CORP"
+  },
+  "expected": {
+    "action": "resolve",
+    "assignment_group": "Service Desk",
+    "impact": 3,
+    "urgency": 3,
+    "priority": 3,
+    "required_events": [
+      "validate_caller",
+      "check_scope",
+      "set_impact_urgency",
+      "assign_group",
+      "add_work_note",
+      "add_comment"
+    ],
+    "required_note_keywords": [
+      "ssid",
+      "forget",
+      "corporate wi-fi",
+      "reconnect",
+      "ipconfig",
+      "confirmed"
+    ]
+  },
+  "correct_steps": [
+    "Confirm user is in office and other users are online",
+    "Forget Guest and old corporate profile",
+    "Reconnect to corporate SSID with current credentials",
+    "Run ipconfig and confirm internal IP",
+    "Document result"
+  ],
+  "rationale": "Single device joining the wrong SSID is Tier 1. Network Operations is not needed unless multiple users are affected.",
+  "response_deadline_minutes": 15,
+  "partial_groups": {
+    "Network Operations": 0.5
+  },
+  "hints": [],
+  "learning_objectives": [],
+  "tool_clues": {
+    "wifi": "AP health normal. Device associated to Guest SSID."
+  }
+}

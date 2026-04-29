@@ -1,0 +1,54 @@
+{
+  "id": "t1_low_disk_space",
+  "title": "Low disk space cleanup",
+  "tier": 1,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] Laptop has low disk space warning",
+    "description": "User receives low disk warnings and cannot install a required update. Device has 4 GB free on C:.",
+    "impact": "3",
+    "urgency": "3",
+    "category": "hardware",
+    "subcategory": "disk",
+    "caller_id": "Training User",
+    "business_service": "Endpoint",
+    "cmdb_ci": "LAPTOP-TRAIN-14"
+  },
+  "expected": {
+    "action": "resolve",
+    "assignment_group": "Desktop Support",
+    "impact": 3,
+    "urgency": 3,
+    "priority": 4,
+    "required_events": [
+      "validate_caller",
+      "check_scope",
+      "set_impact_urgency",
+      "assign_group",
+      "add_work_note",
+      "add_comment"
+    ],
+    "required_note_keywords": [
+      "disk cleanup",
+      "temp files",
+      "onedrive",
+      "recycle bin",
+      "update",
+      "confirmed"
+    ]
+  },
+  "correct_steps": [
+    "Check C: drive free space",
+    "Run Disk Cleanup or Storage Sense",
+    "Clear temp files and recycle bin",
+    "Move user files to OneDrive if appropriate",
+    "Retry update and confirm free space"
+  ],
+  "rationale": "Low disk space on one endpoint is Desktop Support/Tier 1 or Tier 2 endpoint work, not database or network.",
+  "response_deadline_minutes": 30,
+  "partial_groups": {
+    "Service Desk": 0.7
+  },
+  "hints": [],
+  "learning_objectives": [],
+  "tool_clues": {}
+}

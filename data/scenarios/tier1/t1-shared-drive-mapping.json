@@ -1,0 +1,57 @@
+{
+  "id": "t1_shared_drive_mapping",
+  "title": "Shared drive mapping missing",
+  "tier": 1,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] Shared drive missing after login",
+    "description": "User reports the S: drive is missing. They recently changed departments but had access yesterday.",
+    "impact": "3",
+    "urgency": "3",
+    "category": "software",
+    "subcategory": "operating_system",
+    "caller_id": "Training User",
+    "business_service": "File Services",
+    "cmdb_ci": "FS-SHARE-01"
+  },
+  "expected": {
+    "action": "resolve",
+    "assignment_group": "Service Desk",
+    "impact": 3,
+    "urgency": 3,
+    "priority": 3,
+    "required_events": [
+      "validate_caller",
+      "check_scope",
+      "set_impact_urgency",
+      "assign_group",
+      "add_work_note",
+      "check_scope",
+      "assign_group",
+      "add_work_note",
+      "add_comment"
+    ],
+    "required_note_keywords": [
+      "mapped drive",
+      "ad group",
+      "gpupdate",
+      "sign out",
+      "permissions",
+      "confirmed"
+    ]
+  },
+  "correct_steps": [
+    "Confirm exact share path and department",
+    "Check AD group membership",
+    "Map drive manually or run gpupdate",
+    "If access denied, verify group membership",
+    "Confirm drive appears after sign out/in"
+  ],
+  "rationale": "Missing mapped drive may be logon script/GPO or group membership. Tier 1 should collect path and access error before routing.",
+  "response_deadline_minutes": 30,
+  "partial_groups": {
+    "Identity & Access Management": 0.6
+  },
+  "hints": [],
+  "learning_objectives": [],
+  "tool_clues": {}
+}

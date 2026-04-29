@@ -1,0 +1,55 @@
+{
+  "id": "t2_vpn_multiple_users",
+  "title": "VPN disconnecting for multiple remote users",
+  "tier": 2,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] Multiple users report VPN disconnects",
+    "description": "Remote users in different cities report VPN drops every 3-5 minutes after this morning's VPN client update.",
+    "impact": "2",
+    "urgency": "2",
+    "category": "network",
+    "subcategory": "vpn",
+    "caller_id": "Training User",
+    "business_service": "Remote Access",
+    "cmdb_ci": "VPN-GW-01"
+  },
+  "expected": {
+    "action": "escalate",
+    "assignment_group": "Network Operations - Tier 2",
+    "impact": 2,
+    "urgency": 2,
+    "priority": 2,
+    "required_events": [
+      "validate_caller",
+      "check_scope",
+      "check_related_incidents",
+      "set_impact_urgency",
+      "assign_group",
+      "add_work_note"
+    ],
+    "required_note_keywords": [
+      "vpn",
+      "multiple users",
+      "client version",
+      "logs",
+      "update",
+      "escalated"
+    ]
+  },
+  "correct_steps": [
+    "Confirm number of affected users and locations",
+    "Collect VPN client version and timestamps",
+    "Check known issues/change calendar",
+    "Attach sample VPN logs",
+    "Escalate to Network Operations Tier 2"
+  ],
+  "rationale": "Multiple users after a client update is likely infrastructure/configuration or client package issue.",
+  "response_deadline_minutes": 15,
+  "partial_groups": {
+    "Service Desk": 0.5,
+    "Network Operations": 0.7
+  },
+  "hints": [],
+  "learning_objectives": [],
+  "tool_clues": {}
+}

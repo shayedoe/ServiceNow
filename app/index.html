@@ -17,7 +17,7 @@
         <div class="nav-group">Service Desk</div>
         <button data-view="queue" class="nav-btn active">Incidents</button>
         <button data-view="callers" class="nav-btn" disabled>Callers</button>
-        <button data-view="knowledge" class="nav-btn" disabled>Knowledge</button>
+        <button data-view="resources" class="nav-btn">Training Resources</button>
         <button data-view="mywork" class="nav-btn" disabled>My Work</button>
 
         <div class="nav-group">Training</div>
@@ -63,8 +63,8 @@
           </div>
           <div class="field-row"><label>Source</label>
             <select id="sourceSelect">
+              <option value="authored" selected>Authored Pack (Tier 1-3)</option>
               <option value="offline">Offline (generated)</option>
-              <option value="authored">Authored Pack (Tier 1-3)</option>
               <option value="live">Live ServiceNow</option>
             </select>
           </div>
@@ -101,7 +101,12 @@
         <div id="checklist" class="empty">Open an incident to see required actions.</div>
       </div>
       <div class="tp-section">
+        <h2>Quick Actions</h2>
+        <div id="quickActions" class="quick-actions empty">Open an incident to log actions.</div>
+      </div>
+      <div class="tp-section">
         <h2>Coach</h2>
+        <div id="learningObjectives" class="empty"></div>
         <div id="coachPanel" class="empty">Hints appear here when requested.</div>
         <button id="btnHint" class="hint-btn" disabled>Get Hint</button>
       </div>

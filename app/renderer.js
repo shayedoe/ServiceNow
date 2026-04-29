@@ -182,6 +182,99 @@ function renderQueue() {
 }
 
 // ============================================================
+// VIEW: training resources (knowledge base)
+// ============================================================
+let _resourcesCache = null;
+async function renderResources() {
+  state.view = 'resources';
+  state.currentTicket = null;
+  $('#recordPill').textContent = 'Training Resources';
+  $('#viewContainer').innerHTML = '<div class="empty-large"><h2>Loading resources\u2026</h2></div>';
+  try {
+    if (!_resourcesCache) _resourcesCache = await apiCall('/api/resources');
+  } catch (err) {
+    $('#viewContainer').innerHTML = `<div class="empty-large"><h2>Could not load resources</h2><p>${escapeHtml(err.message)}</p></div>`;
+    return;
+  }
+  const r = _resourcesCache;
+
+  const triage = (r.triage_flow || []).map(s => `
+    <div class="res-card">
+      <div class="res-card-h">${s.step}. ${escapeHtml(s.name)}</div>
+      <ul>${(s.questions || []).map(q => `<li>${escapeHtml(q)}</li>`).join('')}</ul>
+    </div>`).join('');
+
+  const priority = `<table class="res-table"><thead><tr><th>Priority</th><th>Impact</th><th>Urgency</th><th>Use when</th></tr></thead><tbody>
+    ${(r.priority_matrix || []).map(p => `<tr>
+      <td><strong>${escapeHtml(p.priority)}</strong></td>
+      <td>${escapeHtml(p.impact)}</td>
+      <td>${escapeHtml(p.urgency)}</td>
+      <td>${escapeHtml(p.use_when)}</td>
+    </tr>`).join('')}
+  </tbody></table>`;
+
+  const routing = `<table class="res-table"><thead><tr><th>Category</th><th>Subcategory</th><th>Group</th><th>Route when</th><th>Escalate when</th><th>Escalate to</th></tr></thead><tbody>
+    ${(r.routing_matrix || []).map(p => `<tr>
+      <td>${escapeHtml(p.category)}</td>
+      <td>${escapeHtml(p.subcategory || '')}</td>
+      <td><strong>${escapeHtml(p.group)}</strong></td>
+      <td>${escapeHtml(p.route_when)}</td>
+      <td>${escapeHtml(p.escalate_when || '')}</td>
+      <td>${escapeHtml(p.escalation_group || '')}</td>
+    </tr>`).join('')}
+  </tbody></table>`;
+
+  const tplBlock = (title, obj) => `
+    <div class="res-card">
+      <div class="res-card-h">${escapeHtml(title)}</div>
+      ${Object.entries(obj || {}).map(([k, v]) => `
+        <div class="tpl-row">
+          <div class="tpl-key">${escapeHtml(k.replace(/_/g, ' '))}</div>
+          <div class="tpl-val">${escapeHtml(v)}</div>
+        </div>`).join('')}
+    </div>`;
+
+  const triggers = `<ul class="res-list">${(r.escalation_triggers || []).map(x => `<li>${escapeHtml(x)}</li>`).join('')}</ul>`;
+  const closure = `<ul class="res-list">${(r.closure_checklist || []).map(x => `<li>${escapeHtml(x)}</li>`).join('')}</ul>`;
+
+  $('#viewContainer').innerHTML = `
+    <div class="queue-header">
+      <h2>Training Resources</h2>
+      <span class="breadcrumb">Service Desk &raquo; Knowledge</span>
+    </div>
+    <div class="res-page">
+      <section class="res-section">
+        <h3>Triage flow</h3>
+        <div class="res-grid">${triage}</div>
+      </section>
+      <section class="res-section">
+        <h3>Priority matrix</h3>
+        ${priority}
+      </section>
+      <section class="res-section">
+        <h3>Routing matrix</h3>
+        ${routing}
+      </section>
+      <section class="res-section">
+        <h3>Templates</h3>
+        <div class="res-grid">
+          ${tplBlock('Work note templates', r.work_note_templates)}
+          ${tplBlock('Caller comment templates', r.customer_comment_templates)}
+        </div>
+      </section>
+      <section class="res-section">
+        <h3>Escalation triggers</h3>
+        ${triggers}
+      </section>
+      <section class="res-section">
+        <h3>Closure checklist</h3>
+        ${closure}
+      </section>
+    </div>
+  `;
+}
+
+// ============================================================
 // VIEW: incident form
 // ============================================================
 async function openIncident(idx) {
@@ -197,6 +290,16 @@ async function openIncident(idx) {
     const fresh = await apiCall(`/api/tickets/${t.number}`);
     Object.assign(t, fresh);
   } catch { /* ignore */ }
+
+  // Pull authored scenario detail (tool_clues + learning_objectives)
+  if (t.scenario_id && !t.scenario_detail) {
+    try {
+      const s = await apiCall(`/api/scenarios/${t.scenario_id}`);
+      t.scenario_detail = s;
+      t.tool_clues = s.tool_clues || {};
+      t.learning_objectives = s.learning_objectives || [];
+    } catch { /* ignore */ }
+  }
 
   // For live tickets, fetch the full SN record once
   if (state.source === 'live' && t.sn?.sys_id && !t.sn_loaded) {
@@ -286,6 +389,8 @@ function renderIncidentView(t) {
       </div>
     </section>
 
+    ${renderToolClues(t)}
+
     <div class="tabs" id="tabBar">
       <button data-tab="notes" class="${state.currentTab==='notes'?'active':''}">Notes</button>
       <button data-tab="related_records" class="${state.currentTab==='related_records'?'active':''}">Related Records</button>
@@ -338,6 +443,43 @@ function selectField({ id, label, value, options, disabled, required }) {
 
 function similarTickets(t) {
   return state.tickets.filter(x => x.short_description === t.short_description && x.number !== t.number);
+}
+
+// ----- Tool clues / simulated evidence -----
+const TOOL_LABELS = {
+  ad: 'Active Directory',
+  intune: 'Intune / MDM',
+  print_server: 'Print Server',
+  vpn_logs: 'VPN Logs',
+  vpn: 'VPN Logs',
+  dns: 'DNS Lookup',
+  service_health: 'Service Health',
+  cmdb: 'CMDB CI',
+  known_issue: 'Known Issue / Change',
+  change: 'Change Record',
+  dhcp: 'DHCP Scope',
+  sso: 'SSO / IdP Logs',
+  email: 'Mail Flow',
+  database: 'Database',
+  db: 'Database',
+  endpoint: 'Endpoint',
+  network: 'Network Monitoring',
+  security: 'Security Tool',
+  catalog: 'Service Catalog'
+};
+function renderToolClues(t) {
+  const clues = t.tool_clues || {};
+  const keys = Object.keys(clues);
+  if (!keys.length) return '';
+  const rows = keys.map(k => `
+    <div class="clue-row">
+      <span class="clue-tool">${escapeHtml(TOOL_LABELS[k] || k.replace(/_/g, ' '))}</span>
+      <span class="clue-text">${escapeHtml(clues[k])}</span>
+    </div>`).join('');
+  return `<section class="evidence-panel">
+    <div class="evidence-header"><strong>Simulated Evidence</strong> <span class="muted">(read what the tools would show before you act)</span></div>
+    ${rows}
+  </section>`;
 }
 
 // ----- Tabs -----
@@ -591,6 +733,34 @@ function renderTrainingPanel(t) {
   `).join('') || '<div class="empty">No required actions defined for this ticket.</div>';
   $('#checklist').innerHTML = items;
 
+  // Quick action buttons
+  const isResolved = t.state === 'Resolved';
+  const QUICK = [
+    { id: 'qaValidate', action: 'validate_caller', label: 'Validate Caller' },
+    { id: 'qaScope', action: 'check_scope', label: 'Check Scope' },
+    { id: 'qaRelated', action: 'check_related_incidents', label: 'Check Related Incidents' },
+    { id: 'qaParent', action: 'link_parent', label: 'Link Parent Incident' }
+  ];
+  const qaHtml = QUICK.map(q => {
+    const done = performed.has(q.action);
+    return `<button class="qa-btn ${done ? 'done' : ''}" data-action="${q.action}" ${isResolved ? 'disabled' : ''}>
+      ${done ? '&#10003; ' : ''}${q.label}
+    </button>`;
+  }).join('');
+  $('#quickActions').innerHTML = qaHtml;
+  $('#quickActions').classList.remove('empty');
+
+  // Learning objectives
+  const objs = t.learning_objectives || [];
+  const loEl = $('#learningObjectives');
+  if (objs.length) {
+    loEl.innerHTML = `<div class="lo-title">Learning objectives</div><ul class="lo-list">${objs.map(o => `<li>${escapeHtml(o)}</li>`).join('')}</ul>`;
+    loEl.classList.remove('empty');
+  } else {
+    loEl.innerHTML = '';
+    loEl.classList.add('empty');
+  }
+
   // Coach panel: hint button + revealed hints
   const hintsRevealed = t.hints_revealed || [];
   $('#coachPanel').innerHTML = hintsRevealed.length
@@ -599,7 +769,6 @@ function renderTrainingPanel(t) {
 
   const btn = $('#btnHint');
   const used = t.hints_used || 0;
-  const isResolved = t.state === 'Resolved';
   btn.disabled = isResolved || used >= 3;
   btn.textContent = used >= 3 ? 'Hints exhausted' : `Get Hint (${used} used, -${used*5}%)`;
   btn.onclick = () => requestHint(t);
@@ -863,10 +1032,14 @@ async function waitForServer() {
     if (btn.id === 'btnStartShift') return startShift();
     if (btn.id === 'btnFinishShift') return finishShift();
     if (btn.id === 'settingsBtn') { await loadSnConfig(); return showSettings(true); }
+    if (btn.dataset.view) {
+      document.querySelectorAll('.sn-left-nav .nav-btn[data-view]').forEach(x => x.classList.toggle('active', x === btn));
+    }
     if (btn.dataset.view === 'queue') {
       if (state.tickets.length) renderQueue();
       else startShift();
     }
+    if (btn.dataset.view === 'resources') return renderResources();
   });
 
   // ----- Settings modal delegation -----
@@ -925,9 +1098,23 @@ async function waitForServer() {
     if (id === 'fCategory') return renderIncidentView(state.currentTicket);
   });
 
-  // Right-rail (training panel) hint button
+  // Right-rail (training panel) hint button + quick actions
   document.getElementById('trainingPanel').addEventListener('click', (e) => {
-    if (e.target.id === 'btnHint' && state.currentTicket) requestHint(state.currentTicket);
+    if (e.target.id === 'btnHint' && state.currentTicket) return requestHint(state.currentTicket);
+    const qa = e.target.closest('.qa-btn');
+    if (qa && state.currentTicket && !qa.disabled) {
+      const action = qa.dataset.action;
+      if (!action) return;
+      // Light per-action payload so events make sense
+      const t = state.currentTicket;
+      const payload = action === 'check_related_incidents'
+        ? { count: similarTickets(t).length + 1 }
+        : action === 'link_parent'
+          ? { parent: prompt('Parent incident number (e.g. INC0001000):', '') || '' }
+          : {};
+      if (action === 'link_parent' && !payload.parent) return;
+      return fireEvent(t, action, payload);
+    }
   });
 
   try {

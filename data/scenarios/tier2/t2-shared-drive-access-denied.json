@@ -1,0 +1,53 @@
+{
+  "id": "t2_shared_drive_access_denied",
+  "title": "Shared drive permission denied after transfer",
+  "tier": 2,
+  "servicenow_seed": {
+    "short_description": "[TRAINING] Access denied to Finance shared drive",
+    "description": "User moved from Sales to Finance. Drive maps correctly but access is denied.",
+    "impact": "3",
+    "urgency": "2",
+    "category": "software",
+    "subcategory": "operating_system",
+    "caller_id": "Training User",
+    "business_service": "File Services",
+    "cmdb_ci": "FS-FINANCE"
+  },
+  "expected": {
+    "action": "escalate",
+    "assignment_group": "Identity & Access Management",
+    "impact": 3,
+    "urgency": 2,
+    "priority": 3,
+    "required_events": [
+      "validate_caller",
+      "check_scope",
+      "assign_group",
+      "add_work_note",
+      "add_comment"
+    ],
+    "required_note_keywords": [
+      "finance",
+      "access denied",
+      "ad group",
+      "manager approval",
+      "permissions",
+      "escalated"
+    ]
+  },
+  "correct_steps": [
+    "Confirm manager or data owner approval",
+    "Check current AD security groups",
+    "Document exact share path and error",
+    "Route to IAM for group membership update if approval exists",
+    "Ask user to sign out/in after change"
+  ],
+  "rationale": "Permission changes for restricted shared drives should route through IAM with approval evidence.",
+  "response_deadline_minutes": 30,
+  "partial_groups": {
+    "Service Desk": 0.6
+  },
+  "hints": [],
+  "learning_objectives": [],
+  "tool_clues": {}
+}
