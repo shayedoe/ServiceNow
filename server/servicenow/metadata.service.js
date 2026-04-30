@@ -47,7 +47,50 @@ async function getIncidentMetadata() {
         listChoices('state'),
         listChoices('contact_type')
       ]);
-    return { category, subcategory, impact, urgency, priority, state, contact_type };
+    // Many PDIs have no sys_choice rows for the numeric fields; fall back so the form is usable.
+    const DEFAULTS = {
+      impact: [
+        { value: '1', label: '1 - High' },
+        { value: '2', label: '2 - Medium' },
+        { value: '3', label: '3 - Low' }
+      ],
+      urgency: [
+        { value: '1', label: '1 - High' },
+        { value: '2', label: '2 - Medium' },
+        { value: '3', label: '3 - Low' }
+      ],
+      priority: [
+        { value: '1', label: '1 - Critical' },
+        { value: '2', label: '2 - High' },
+        { value: '3', label: '3 - Moderate' },
+        { value: '4', label: '4 - Low' },
+        { value: '5', label: '5 - Planning' }
+      ],
+      state: [
+        { value: '1', label: 'New' },
+        { value: '2', label: 'In Progress' },
+        { value: '3', label: 'On Hold' },
+        { value: '6', label: 'Resolved' },
+        { value: '7', label: 'Closed' },
+        { value: '8', label: 'Canceled' }
+      ],
+      contact_type: [
+        { value: 'phone', label: 'Phone' },
+        { value: 'email', label: 'Email' },
+        { value: 'self-service', label: 'Self-service' },
+        { value: 'walk-in', label: 'Walk-in' }
+      ]
+    };
+    const pick = (live, def) => (Array.isArray(live) && live.length ? live : def);
+    return {
+      category,
+      subcategory,
+      impact: pick(impact, DEFAULTS.impact),
+      urgency: pick(urgency, DEFAULTS.urgency),
+      priority: pick(priority, DEFAULTS.priority),
+      state: pick(state, DEFAULTS.state),
+      contact_type: pick(contact_type, DEFAULTS.contact_type)
+    };
   });
 }
 

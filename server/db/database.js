@@ -29,6 +29,7 @@ function getDb() {
     }
   };
   ensureCol('tickets', 'caller_label', "TEXT DEFAULT ''");
+  ensureCol('tickets', 'caller_id', "TEXT DEFAULT ''");
   ensureCol('tickets', 'subcategory', "TEXT DEFAULT ''");
   ensureCol('tickets', 'business_service', "TEXT DEFAULT ''");
   ensureCol('tickets', 'cmdb_ci', "TEXT DEFAULT ''");

@@ -143,7 +143,7 @@ function renderQueue() {
         <td class="num-cell">${escapeHtml(t.number)}</td>
         <td>${escapeHtml(formatDate(t.created_at || t.opened_at))}</td>
         <td>${escapeHtml(t.short_description || '')}</td>
-        <td>${escapeHtml(t.caller_label || t.sn?.caller_label || '(training user)')}</td>
+        <td>${escapeHtml(t.caller_label || t.sn?.caller_label || '')}</td>
         <td>${pri ? `<span class="priority-pill p${pri}">${pri} - ${priorityLabel(pri)}</span>` : '<span class="muted">—</span>'}</td>
         <td>${escapeHtml(t.state || 'New')}</td>
         <td>${escapeHtml(t.category || '')}</td>
@@ -444,7 +444,7 @@ function renderIncidentView(t) {
       <div class="form-grid">
         <div class="left-col">
           ${field({ id:'fNumber', label:'Number', value:v.number, readonly:true })}
-          ${field({ id:'fCaller', label:'Caller', value:v.caller, required:true, readonly:true })}
+          ${callerField({ value: v.caller, callerKey: v.caller_id || t.caller_id || v.caller })}
           ${selectField({ id:'fCategory', label:'Category', value:v.category, options:meta.category, disabled:isResolved })}
           ${selectField({ id:'fSubcategory', label:'Subcategory', value:v.subcategory, options:subOpts, disabled:isResolved })}
           ${field({ id:'fService', label:'Service', value:v.business_service, readonly:true })}
@@ -493,6 +493,18 @@ function field({ id, label, value, required, readonly }) {
   return `<div class="field-row ${readonly?'readonly':''}">
     <label for="${id}">${req}${escapeHtml(label)}</label>
     <input id="${id}" value="${escapeHtml(value)}" ${readonly?'readonly':''} />
+  </div>`;
+}
+function callerField({ value, callerKey }) {
+  const key = (callerKey || value || '').toString();
+  return `<div class="field-row readonly caller-field">
+    <label for="fCaller"><span class="required">*</span>Caller</label>
+    <div class="caller-input">
+      <input id="fCaller" value="${escapeHtml(value)}" readonly />
+      <button type="button" class="caller-info-btn" data-caller-info="${escapeHtml(key)}" title="View caller details" aria-label="View caller details">
+        <span aria-hidden="true">&#9432;</span>
+      </button>
+    </div>
   </div>`;
 }
 function textareaField({ id, label, value, readonly }) {
@@ -634,6 +646,68 @@ function impactLabel(v) {
 }
 
 // ----- CI / Service detail modal -----
+// ----- Caller detail modal -----
+async function openCallerDetail(key) {
+  let modal = document.getElementById('callerModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'callerModal';
+    modal.className = 'modal hidden';
+    modal.innerHTML = '<div class="modal-card caller-card"><div id="callerModalBody"></div></div>';
+    document.body.appendChild(modal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.classList.add('hidden');
+      const back = e.target.closest('[data-caller-close]');
+      if (back) modal.classList.add('hidden');
+    });
+  }
+  const body = document.getElementById('callerModalBody');
+  body.innerHTML = '<div class="empty-large"><h2>Loading\u2026</h2></div>';
+  modal.classList.remove('hidden');
+  let c;
+  try { c = await apiCall(`/api/callers/${encodeURIComponent(key || '')}`); }
+  catch (err) { body.innerHTML = `<div class="empty-large"><h2>Could not load caller</h2><p>${escapeHtml(err.message)}</p></div>`; return; }
+
+  const yn = (v) => v ? '<span class="pill yes">Yes</span>' : '<span class="pill no">No</span>';
+  const fullName = `${c.first_name || ''} ${c.last_name || ''}`.trim() || c.user_id || '(unknown)';
+  const initials = (fullName.split(/\s+/).map(s => s[0]).slice(0, 2).join('') || '?').toUpperCase();
+
+  body.innerHTML = `
+    <div class="caller-header">
+      <div class="caller-avatar">${escapeHtml(initials)}</div>
+      <div style="flex:1;">
+        <div class="label">User profile</div>
+        <h2>${escapeHtml(fullName)}${c.vip ? ' <span class="pill vip">VIP</span>' : ''}</h2>
+        <div class="muted">${escapeHtml(c.title || '')}${c.department ? ' &middot; ' + escapeHtml(c.department) : ''}</div>
+      </div>
+      <button class="sn-btn" data-caller-close>Close</button>
+    </div>
+    ${c.synthesized ? '<div class="banner">&#9888; This caller is not in the user catalog. Showing a synthesized record.</div>' : ''}
+    <div class="caller-grid">
+      <div class="kv"><span>User ID</span><strong>${escapeHtml(c.user_id || '')}</strong></div>
+      <div class="kv"><span>First name</span><strong>${escapeHtml(c.first_name || '')}</strong></div>
+      <div class="kv"><span>Last name</span><strong>${escapeHtml(c.last_name || '')}</strong></div>
+      <div class="kv"><span>Title</span><strong>${escapeHtml(c.title || '')}</strong></div>
+      <div class="kv"><span>Department</span><strong>${escapeHtml(c.department || '')}</strong></div>
+      <div class="kv"><span>Manager</span><strong>${escapeHtml(c.manager || '')}</strong></div>
+      <div class="kv"><span>Location</span><strong>${escapeHtml(c.location || '')}</strong></div>
+      <div class="kv"><span>Email</span><strong>${escapeHtml(c.email || '')}</strong></div>
+      <div class="kv"><span>Business phone</span><strong>${escapeHtml(c.business_phone || '')}</strong></div>
+      <div class="kv"><span>Mobile phone</span><strong>${escapeHtml(c.mobile_phone || '')}</strong></div>
+      <div class="kv"><span>Time zone</span><strong>${escapeHtml(c.time_zone || '')}</strong></div>
+      <div class="kv"><span>Date format</span><strong>${escapeHtml(c.date_format || '')}</strong></div>
+      <div class="kv"><span>Language</span><strong>${escapeHtml(c.language || '')}</strong></div>
+      <div class="kv"><span>Notification</span><strong>${escapeHtml(c.notification || '')}</strong></div>
+      <div class="kv"><span>Calendar integration</span><strong>${escapeHtml(c.calendar_integration || '')}</strong></div>
+      <div class="kv"><span>Identity type</span><strong>${escapeHtml(c.identity_type || '-')}</strong></div>
+      <div class="kv"><span>Active</span>${yn(c.active)}</div>
+      <div class="kv"><span>Locked out</span>${yn(c.locked_out)}</div>
+      <div class="kv"><span>Password needs reset</span>${yn(c.password_needs_reset)}</div>
+      <div class="kv"><span>Web service access only</span>${yn(c.web_service_access_only)}</div>
+      <div class="kv"><span>Internal Integration User</span>${yn(c.internal_integration_user)}</div>
+    </div>`;
+}
+
 async function openCiDetail(name) {
   let modal = document.getElementById('ciModal');
   if (!modal) {
@@ -1344,6 +1418,11 @@ async function waitForServer() {
     if (btn.id === 'btnPostComment') return postCallerComment(state.currentTicket);
     if (btn.id === 'btnNewShift') return startShift();
 
+    // Caller info button
+    if (btn.dataset.callerInfo !== undefined) {
+      return openCallerDetail(btn.dataset.callerInfo);
+    }
+
     // Tab switch
     if (btn.dataset.tab && btn.parentElement?.id === 'tabBar') {
       state.currentTab = btn.dataset.tab;
@@ -1421,7 +1500,7 @@ async function waitForServer() {
         const n = similarTickets(t).length;
         showToast(n ? `${n} related ticket(s) share this short description.` : 'No related incidents found in queue.');
       } else if (action === 'validate_caller') {
-        showToast('Caller verified: ' + (t.caller_label || '(training user)'));
+        showToast('Caller verified: ' + (t.caller_label || '(unknown)'));
       } else if (action === 'check_scope') {
         showToast('Scope check logged. Capture: how many users, devices, locations.');
       }

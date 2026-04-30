@@ -1,4 +1,6 @@
 const { Router } = require('express');
+const path = require('path');
+const fs = require('fs');
 const router = Router();
 
 const sessionsRepo = require('../db/repositories/sessions.repo');
@@ -8,6 +10,34 @@ const state = require('../state');
 const { generateTickets } = require('../../engine/generator');
 const scenarioLoader = require('../../engine/scenarioLoader');
 
+// ---- Caller catalog (for picking a realistic persona per scenario) ----
+let callerCache = null;
+function loadCallerKeys() {
+  if (callerCache) return callerCache;
+  try {
+    const raw = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'data', 'callers.json'), 'utf8'));
+    callerCache = Object.keys(raw.items || {});
+  } catch { callerCache = []; }
+  return callerCache;
+}
+function pickCallerForScenario(scenarioId) {
+  const keys = loadCallerKeys();
+  if (!keys.length) return '';
+  // Deterministic hash on scenario id so each scenario gets the same caller every time
+  let h = 0;
+  for (const ch of String(scenarioId || '')) h = ((h << 5) - h + ch.charCodeAt(0)) | 0;
+  return keys[Math.abs(h) % keys.length];
+}
+function callerLabelFor(userId) {
+  if (!userId) return '';
+  try {
+    const raw = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'data', 'callers.json'), 'utf8'));
+    const c = (raw.items || {})[userId];
+    if (c) return `${c.first_name || ''} ${c.last_name || ''}`.trim() || userId;
+  } catch {}
+  return userId;
+}
+
 /**
  * Convert an authored scenario pack into a local ticket object.
  */
@@ -15,17 +45,25 @@ function scenarioToTicket(scenario, idx, session_id) {
   const seed = scenario.servicenow_seed || {};
   const exp = scenario.expected || {};
   const id = `${session_id}_t${String(idx + 1).padStart(3, '0')}`;
+  // Strip "[TRAINING] " prefix if present
+  const shortDesc = (seed.short_description || scenario.title || '').replace(/^\s*\[TRAINING\]\s*/i, '');
+  // Replace generic "Training User" caller with a deterministic real persona
+  const seedCaller = seed.caller_id || '';
+  const isPlaceholder = !seedCaller || /^training user$/i.test(seedCaller);
+  const callerKey = isPlaceholder ? pickCallerForScenario(scenario.id) : seedCaller;
+  const callerLabel = isPlaceholder ? callerLabelFor(callerKey) : seedCaller;
   return {
     id,
     session_id,
     number: `TKT${String(1000 + idx + 1)}`,
-    short_description: seed.short_description || scenario.title || '',
+    short_description: shortDesc,
     description: seed.description || '',
     category: seed.category || 'general',
     subcategory: seed.subcategory || '',
     business_service: seed.business_service || '',
     cmdb_ci: seed.cmdb_ci || '',
-    caller_label: seed.caller_id || 'Training User',
+    caller_label: callerLabel,
+    caller_id: callerKey,
     tier: scenario.tier || 1,
     // Trainee-set fields start blank so they have to triage
     priority: null,
