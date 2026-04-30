@@ -17,7 +17,8 @@ function detectPatternEscalation(ticket, allTickets) {
 function buildRubric(ticket, opts = {}) {
   const patternForcesEscalate = opts.patternForcesEscalate;
   const expectedAction = patternForcesEscalate ? 'escalate' : ticket.correct_action;
-  const expectedGroup = ticket.correct_group || ticket.assignment_group || '';
+  const expectedGroup = ticket.expected_assignment_group || ticket.correct_group || ticket.assignment_group || '';
+  const expectedPriority = ticket.expected_priority || ticket.priority;
 
   const rules = [];
 
@@ -53,7 +54,7 @@ function buildRubric(ticket, opts = {}) {
     label: 'Priority',
     weight: 20,
     type: 'oneOff',
-    expected: ticket.priority,
+    expected: expectedPriority,
     why_correct: 'Priority drives SLA timers; matching it correctly keeps reporting clean.',
     why_wrong: 'Priority drives SLA timers; mis-priority distorts queue triage.'
   });
@@ -102,7 +103,7 @@ function buildRubric(ticket, opts = {}) {
 function scoreTicket(ticket, userInput, allTickets, opts = {}) {
   const patternForcesEscalate = detectPatternEscalation(ticket, allTickets);
   const expectedAction = patternForcesEscalate ? 'escalate' : ticket.correct_action;
-  const expectedGroup = ticket.correct_group || ticket.assignment_group || '';
+  const expectedGroup = ticket.expected_assignment_group || ticket.correct_group || ticket.assignment_group || '';
 
   const rubric = buildRubric(ticket, {
     patternForcesEscalate,

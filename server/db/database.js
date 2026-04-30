@@ -34,6 +34,10 @@ function getDb() {
   ensureCol('tickets', 'cmdb_ci', "TEXT DEFAULT ''");
   ensureCol('tickets', 'tool_clues', "TEXT DEFAULT '{}'");
   ensureCol('tickets', 'learning_objectives', "TEXT DEFAULT '[]'");
+  ensureCol('tickets', 'expected_priority', 'INTEGER');
+  ensureCol('tickets', 'expected_impact', 'INTEGER');
+  ensureCol('tickets', 'expected_urgency', 'INTEGER');
+  ensureCol('tickets', 'expected_assignment_group', "TEXT DEFAULT ''");
   return db;
 }
 

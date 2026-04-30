@@ -67,6 +67,10 @@ router.post('/tickets/:number/event', (req, res) => {
     if (Object.keys(updates).length) ticketsRepo.updateTicket(t.id, updates);
   }
 
+  if (action_type === 'set_priority' && payload?.priority) {
+    ticketsRepo.updateTicket(t.id, { priority: Number(payload.priority) });
+  }
+
   if (action_type === 'assign_group' && payload?.group) {
     ticketsRepo.updateTicket(t.id, { assignment_group: payload.group });
   }

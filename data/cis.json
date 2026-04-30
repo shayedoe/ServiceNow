@@ -1,0 +1,157 @@
+{
+  "_doc": "Lightweight CI / business-service catalog for the simulator. Used by the CI detail panel and dependency view. Match by exact name (case-insensitive).",
+  "items": {
+    "PRINT-DRIVER-V12.4": {
+      "name": "PRINT-DRIVER-V12.4",
+      "type": "Software / Driver",
+      "owned_by": "Endpoint Engineering",
+      "criticality": "2 - somewhat critical",
+      "operational_status": "Degraded",
+      "support_group": "Endpoint Engineering",
+      "description": "Universal print driver v12.4 deployed via Intune to all Windows endpoints.",
+      "depends_on": [
+        { "name": "Intune", "type": "Service", "relation": "Distributed by" },
+        { "name": "Print Server PRT-CORE-01", "type": "Server", "relation": "Used by" }
+      ],
+      "used_by": [
+        { "name": "All Windows Endpoints", "type": "Group", "relation": "Installed on" }
+      ],
+      "recent_changes": [
+        { "ts": "2026-04-29 02:00", "by": "Endpoint Engineering", "what": "CHG0009312: Driver rolled out v12.3 -> v12.4" }
+      ],
+      "active_alerts": [
+        { "severity": "warn", "text": "12 spoolsv.exe crash dumps in last 4h across 9 endpoints" }
+      ]
+    },
+    "VPN-GATEWAY-01": {
+      "name": "VPN-GATEWAY-01",
+      "type": "Network / Gateway",
+      "owned_by": "Network Operations",
+      "criticality": "1 - most critical",
+      "operational_status": "Degraded",
+      "support_group": "Network Operations",
+      "description": "Primary VPN gateway for remote workforce. Cisco AnyConnect.",
+      "depends_on": [
+        { "name": "Edge Firewall FW-EDGE-01", "type": "Firewall", "relation": "Behind" },
+        { "name": "Internal CA", "type": "PKI", "relation": "Trusts certificates from" }
+      ],
+      "used_by": [
+        { "name": "Remote Workforce", "type": "Group", "relation": "Connect via" }
+      ],
+      "recent_changes": [
+        { "ts": "2026-04-29 06:00", "by": "Network Operations", "what": "CHG0009201: VPN gateway certificate renewal" }
+      ],
+      "active_alerts": [
+        { "severity": "high", "text": "47 client cert-not-trusted failures since 06:05" }
+      ]
+    },
+    "DNS-CORP-RECORDS": {
+      "name": "DNS-CORP-RECORDS",
+      "type": "DNS / Service",
+      "owned_by": "Network Engineering",
+      "criticality": "1 - most critical",
+      "operational_status": "Operational",
+      "support_group": "Network Engineering",
+      "description": "Authoritative DNS records for corp.local internal zone.",
+      "depends_on": [
+        { "name": "AD Domain Controllers", "type": "Server", "relation": "Hosted on" }
+      ],
+      "used_by": [
+        { "name": "All Internal Apps", "type": "Group", "relation": "Resolve via" }
+      ],
+      "active_alerts": []
+    },
+    "AP-FLOOR-4": {
+      "name": "AP-FLOOR-4",
+      "type": "Wireless / Access Point Cluster",
+      "owned_by": "Network Operations",
+      "criticality": "2 - somewhat critical",
+      "operational_status": "Outage",
+      "support_group": "Network Operations",
+      "description": "Wireless AP cluster on floor 4 (6 APs).",
+      "depends_on": [
+        { "name": "WLC-CORE", "type": "Wireless LAN Controller", "relation": "Managed by" },
+        { "name": "Floor 4 PoE Switch", "type": "Switch", "relation": "Powered by" }
+      ],
+      "used_by": [
+        { "name": "Floor 4 Workforce", "type": "Group", "relation": "Connect via" }
+      ],
+      "active_alerts": [
+        { "severity": "critical", "text": "All 6 APs offline since 09:42" }
+      ]
+    },
+    "M365-TENANT": {
+      "name": "M365-TENANT",
+      "type": "Cloud Service / SaaS",
+      "owned_by": "Identity & Collaboration",
+      "criticality": "1 - most critical",
+      "operational_status": "Operational",
+      "support_group": "Identity & Access Management",
+      "description": "Microsoft 365 tenant hosting Exchange Online, Teams, OneDrive, SharePoint.",
+      "depends_on": [
+        { "name": "Entra ID", "type": "Identity Provider", "relation": "Authenticates via" }
+      ],
+      "used_by": [
+        { "name": "All Employees", "type": "Group", "relation": "Sign in for productivity" }
+      ],
+      "active_alerts": []
+    },
+    "HRIS-PAYROLL-PROD": {
+      "name": "HRIS-PAYROLL-PROD",
+      "type": "Application / SaaS",
+      "owned_by": "HRIS Application Support",
+      "criticality": "1 - most critical",
+      "operational_status": "Degraded",
+      "support_group": "HRIS Application Support",
+      "description": "Production payroll application. Time-sensitive payroll cutoffs.",
+      "depends_on": [
+        { "name": "Entra ID", "type": "Identity Provider", "relation": "SAML SSO" },
+        { "name": "Payroll DB", "type": "Database", "relation": "Backed by" }
+      ],
+      "active_alerts": [
+        { "severity": "high", "text": "4 related INCs in last 30 minutes" }
+      ]
+    },
+    "CR-3A-LOGI-RALLY": {
+      "name": "CR-3A-LOGI-RALLY",
+      "type": "AV / Conference Camera",
+      "owned_by": "AV Support",
+      "criticality": "3 - low",
+      "operational_status": "Operational",
+      "support_group": "AV Support",
+      "description": "Logitech Rally camera in conference room CR-3A.",
+      "depends_on": [
+        { "name": "CR-3A Room PC", "type": "Endpoint", "relation": "USB-attached to" }
+      ],
+      "active_alerts": []
+    },
+    "Endpoint": {
+      "name": "Endpoint",
+      "type": "Business Service",
+      "owned_by": "Endpoint Engineering",
+      "criticality": "2 - somewhat critical",
+      "operational_status": "Operational",
+      "support_group": "Desktop Support",
+      "description": "Endpoint computing service: laptops, desktops, peripherals.",
+      "depends_on": [
+        { "name": "Intune", "type": "MDM", "relation": "Managed by" },
+        { "name": "Active Directory", "type": "Identity", "relation": "Joins" }
+      ],
+      "active_alerts": []
+    },
+    "Identity and Access": {
+      "name": "Identity and Access",
+      "type": "Business Service",
+      "owned_by": "Identity & Access Management",
+      "criticality": "1 - most critical",
+      "operational_status": "Operational",
+      "support_group": "Identity & Access Management",
+      "description": "Sign-in, authentication, MFA, account lifecycle.",
+      "depends_on": [
+        { "name": "Entra ID", "type": "Identity Provider", "relation": "Backed by" },
+        { "name": "Active Directory", "type": "Directory", "relation": "Sync source" }
+      ],
+      "active_alerts": []
+    }
+  }
+}

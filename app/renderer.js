@@ -134,17 +134,17 @@ function renderQueue() {
   state.currentTicket = null;
   $('#recordPill').textContent = 'Incident Queue';
   const rows = state.tickets.map((t, idx) => {
-    const isResolved = t.state === 'Resolved' && t.resolution;
+    const isResolved = t.state === 'Resolved';
     const pct = isResolved ? t.resolution.pct : null;
     const scoreCls = pct == null ? '' : pct >= 80 ? 'good' : pct >= 50 ? 'ok' : 'bad';
-    const pri = Number(t.priority) || 3;
+    const pri = Number(t.priority) || 0;
     return `
       <tr data-idx="${idx}" class="${isResolved ? 'resolved' : ''}">
         <td class="num-cell">${escapeHtml(t.number)}</td>
         <td>${escapeHtml(formatDate(t.created_at || t.opened_at))}</td>
         <td>${escapeHtml(t.short_description || '')}</td>
         <td>${escapeHtml(t.caller_label || t.sn?.caller_label || '(training user)')}</td>
-        <td><span class="priority-pill p${pri}">${pri} - ${priorityLabel(pri)}</span></td>
+        <td>${pri ? `<span class="priority-pill p${pri}">${pri} - ${priorityLabel(pri)}</span>` : '<span class="muted">—</span>'}</td>
         <td>${escapeHtml(t.state || 'New')}</td>
         <td>${escapeHtml(t.category || '')}</td>
         <td>${escapeHtml(t.assignment_group || '')}</td>
@@ -405,17 +405,17 @@ function renderIncidentView(t) {
     caller_id: live.caller_id || '',
     category: live.category || t.category || '',
     subcategory: live.subcategory || t.subcategory || '',
-    business_service: live.business_service_label || '',
+    business_service: live.business_service_label || t.business_service || '',
     service_offering: live.service_offering_label || '',
-    cmdb_ci: live.cmdb_ci_label || '',
+    cmdb_ci: live.cmdb_ci_label || t.cmdb_ci || '',
     short_description: live.short_description || t.short_description || '',
     description: live.description || t.description || '',
     channel: live.channel || 'phone',
     state_val: live.state || t.state || 'New',
-    impact: String(live.impact || t.impact || 3),
-    urgency: String(live.urgency || t.urgency || 3),
-    priority: String(live.priority || t.priority || 3),
-    assignment_group: live.assignment_group_label || t.assignment_group || '',
+    impact: t.impact != null ? String(t.impact) : (live.impact != null ? String(live.impact) : ''),
+    urgency: t.urgency != null ? String(t.urgency) : (live.urgency != null ? String(live.urgency) : ''),
+    priority: t.priority != null ? String(t.priority) : (live.priority != null ? String(live.priority) : ''),
+    assignment_group: t.assignment_group || live.assignment_group_label || '',
     assigned_to: live.assigned_to_label || ''
   };
 
@@ -558,14 +558,162 @@ function renderToolClues(t) {
   </section>`;
 }
 
+// ----- Activity stream (merge events + notes ServiceNow-style) -----
+function buildActivityStream(t) {
+  const items = [];
+  for (const n of (t.notes || [])) {
+    items.push({
+      kind: (n.kind || 'work_notes'),
+      at: n.at || t.created_at,
+      who: n.by || 'You',
+      text: n.text || ''
+    });
+  }
+  for (const e of (t.events || [])) {
+    const when = e.created_at || e.at || e.timestamp || t.created_at;
+    if (e.action_type === 'add_work_note' || e.action_type === 'add_comment') continue; // notes already in stream
+    if (e.action_type === 'set_impact_urgency') {
+      const p = e.payload || {};
+      const fields = [];
+      if (p.impact) fields.push({ k: 'Impact', v: `${p.impact} - ${impactLabel(p.impact)}` });
+      if (p.urgency) fields.push({ k: 'Urgency', v: `${p.urgency} - ${impactLabel(p.urgency)}` });
+      if (fields.length) items.push({ kind: 'field_changes', at: when, who: 'You', fields });
+      continue;
+    }
+    if (e.action_type === 'set_priority') {
+      items.push({ kind: 'field_changes', at: when, who: 'You', fields: [{ k: 'Priority', v: `${e.payload?.priority} - ${priorityLabel(e.payload?.priority)}` }] });
+      continue;
+    }
+    if (e.action_type === 'assign_group') {
+      items.push({ kind: 'field_changes', at: when, who: 'You', fields: [{ k: 'Assignment group', v: e.payload?.group || '' }] });
+      continue;
+    }
+    items.push({
+      kind: 'event',
+      at: when,
+      who: 'You',
+      text: labelFor(e.action_type) + (summarizePayload(e.action_type, e.payload) ? ` \u2014 ${summarizePayload(e.action_type, e.payload)}` : '')
+    });
+  }
+  // Sort newest first like SN
+  items.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());
+  return items;
+}
+
+function renderActivityItem(it) {
+  const ts = formatDate(it.at);
+  const who = escapeHtml(it.who || 'You');
+  const initials = (it.who || 'You').split(/\s+/).map(s => s[0]).slice(0, 2).join('').toUpperCase();
+  if (it.kind === 'field_changes') {
+    const rows = (it.fields || []).map(f => `<div class="fc-row"><span class="fc-key">${escapeHtml(f.k)}</span><span class="fc-val">${escapeHtml(f.v)}</span></div>`).join('');
+    return `
+      <div class="activity-item field_changes">
+        <div class="avatar">${escapeHtml(initials)}</div>
+        <div class="ai-body">
+          <div class="meta"><span class="who">${who}</span><span>Field changes &middot; ${ts}</span></div>
+          <div class="fc-list">${rows}</div>
+        </div>
+      </div>`;
+  }
+  const label = it.kind === 'work_notes' ? 'Work notes'
+    : it.kind === 'comment' ? 'Comments'
+    : it.kind === 'event' ? 'Action'
+    : 'Activity';
+  return `
+    <div class="activity-item ${it.kind}">
+      <div class="avatar">${escapeHtml(initials)}</div>
+      <div class="ai-body">
+        <div class="meta"><span class="who">${who}</span><span>${label} &middot; ${ts}</span></div>
+        <div class="body">${escapeHtml(it.text || '')}</div>
+      </div>
+    </div>`;
+}
+
+function impactLabel(v) {
+  return ({ '1': 'High', '2': 'Medium', '3': 'Low' })[String(v)] || '';
+}
+
+// ----- CI / Service detail modal -----
+async function openCiDetail(name) {
+  let modal = document.getElementById('ciModal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'ciModal';
+    modal.className = 'modal hidden';
+    modal.innerHTML = '<div class="modal-card ci-card"><div id="ciModalBody"></div></div>';
+    document.body.appendChild(modal);
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.classList.add('hidden');
+      const back = e.target.closest('[data-ci-close]');
+      if (back) modal.classList.add('hidden');
+      const dep = e.target.closest('[data-ci-link]');
+      if (dep) openCiDetail(dep.dataset.ciLink);
+    });
+  }
+  const body = document.getElementById('ciModalBody');
+  body.innerHTML = '<div class="empty-large"><h2>Loading\u2026</h2></div>';
+  modal.classList.remove('hidden');
+  let ci;
+  try { ci = await apiCall(`/api/cis/${encodeURIComponent(name)}`); }
+  catch (err) { body.innerHTML = `<div class="empty-large"><h2>Could not load CI</h2><p>${escapeHtml(err.message)}</p></div>`; return; }
+
+  const depRows = (ci.depends_on || []).map(d => `
+    <div class="dep-row">
+      <span class="dep-rel">${escapeHtml(d.relation || 'Depends on')}</span>
+      <a href="#" data-ci-link="${escapeHtml(d.name)}" class="dep-name">${escapeHtml(d.name)}</a>
+      <span class="dep-type">${escapeHtml(d.type || '')}</span>
+    </div>`).join('') || '<div class="empty">No upstream dependencies recorded.</div>';
+
+  const usedRows = (ci.used_by || []).map(d => `
+    <div class="dep-row">
+      <span class="dep-rel">${escapeHtml(d.relation || 'Used by')}</span>
+      <span class="dep-name">${escapeHtml(d.name)}</span>
+      <span class="dep-type">${escapeHtml(d.type || '')}</span>
+    </div>`).join('') || '<div class="empty">No downstream consumers recorded.</div>';
+
+  const alerts = (ci.active_alerts || []).map(a => `
+    <div class="ci-alert sev-${escapeHtml(a.severity || 'info')}">
+      <strong>${escapeHtml((a.severity || 'info').toUpperCase())}</strong> ${escapeHtml(a.text || '')}
+    </div>`).join('') || '<div class="empty">No active alerts.</div>';
+
+  const changes = (ci.recent_changes || []).map(c => `
+    <div class="ci-change"><span class="ts">${escapeHtml(c.ts || '')}</span> &middot; <span class="by">${escapeHtml(c.by || '')}</span><div>${escapeHtml(c.what || '')}</div></div>`).join('') || '<div class="empty">No recent changes on file.</div>';
+
+  body.innerHTML = `
+    <div class="ci-header">
+      <div>
+        <div class="label">${escapeHtml(ci.type || 'Configuration Item')}</div>
+        <h2>${escapeHtml(ci.name)}</h2>
+      </div>
+      <button class="sn-btn" data-ci-close>Close</button>
+    </div>
+    <div class="ci-grid">
+      <div class="ci-fields">
+        <div class="kv"><span>Name</span><strong>${escapeHtml(ci.name)}</strong></div>
+        <div class="kv"><span>Type</span><strong>${escapeHtml(ci.type || '')}</strong></div>
+        <div class="kv"><span>Owned by</span><strong>${escapeHtml(ci.owned_by || '')}</strong></div>
+        <div class="kv"><span>Business criticality</span><strong>${escapeHtml(ci.criticality || '')}</strong></div>
+        <div class="kv"><span>Operational status</span><strong class="status-${escapeHtml((ci.operational_status||'').toLowerCase())}">${escapeHtml(ci.operational_status || '')}</strong></div>
+        <div class="kv"><span>Support group</span><strong>${escapeHtml(ci.support_group || '')}</strong></div>
+        <div class="kv full"><span>Description</span><div>${escapeHtml(ci.description || '')}</div></div>
+      </div>
+      <div class="ci-rel">
+        <h3>Active alerts</h3>
+        ${alerts}
+        <h3>Depends on</h3>
+        <div class="dep-list">${depRows}</div>
+        <h3>Used by</h3>
+        <div class="dep-list">${usedRows}</div>
+        <h3>Recent changes</h3>
+        <div class="ci-changes">${changes}</div>
+      </div>
+    </div>`;
+}
+
 // ----- Tabs -----
 function renderTab(t) {
   if (state.currentTab === 'notes') {
-    const notes = (t.notes || []).map(n => `
-      <div class="activity-item work_notes">
-        <div class="meta"><span class="who">${escapeHtml(n.by || 'You')}</span><span>Work notes &middot; ${escapeHtml(formatDate(n.at))}</span></div>
-        <div class="body">${escapeHtml(n.text)}</div>
-      </div>`).join('');
+    const stream = buildActivityStream(t);
     return `
       <div>
         <label style="font-size:12px;color:var(--sn-muted);">Work notes</label>
@@ -582,8 +730,8 @@ function renderTab(t) {
         </div>
       </div>
       <div class="activity-stream">
-        <div style="font-size:11px;text-transform:uppercase;color:var(--sn-muted);font-weight:700;margin-bottom:6px;">Activity (${(t.notes||[]).length})</div>
-        ${notes || '<div class="empty">No activity yet.</div>'}
+        <div style="font-size:11px;text-transform:uppercase;color:var(--sn-muted);font-weight:700;margin-bottom:6px;">Activity (${stream.length})</div>
+        ${stream.length ? stream.map(renderActivityItem).join('') : '<div class="empty">No activity yet.</div>'}
       </div>
     `;
   }
@@ -626,11 +774,11 @@ function renderAuthoredRelatedList(t) {
     </tbody></table>`;
   }
   if (rel === 'affected_cis' || rel === 'impacted_services') {
-    const ci = (t.scenario_detail?.servicenow_seed?.cmdb_ci) || '';
-    const svc = (t.scenario_detail?.servicenow_seed?.business_service) || '';
+    const ci = (t.cmdb_ci) || (t.scenario_detail?.servicenow_seed?.cmdb_ci) || '';
+    const svc = (t.business_service) || (t.scenario_detail?.servicenow_seed?.business_service) || '';
     const rows = [];
-    if (ci) rows.push(`<tr><td>${escapeHtml(ci)}</td><td>Configuration Item</td></tr>`);
-    if (svc) rows.push(`<tr><td>${escapeHtml(svc)}</td><td>Business Service</td></tr>`);
+    if (ci) rows.push(`<tr data-ci="${escapeHtml(ci)}" class="ci-row"><td>${escapeHtml(ci)}</td><td>Configuration Item</td></tr>`);
+    if (svc) rows.push(`<tr data-ci="${escapeHtml(svc)}" class="ci-row"><td>${escapeHtml(svc)}</td><td>Business Service</td></tr>`);
     if (!rows.length) return '<div class="empty">No CIs linked.</div>';
     return `<table class="related-table"><thead><tr><th>Item</th><th>Type</th></tr></thead><tbody>${rows.join('')}</tbody></table>`;
   }
@@ -706,6 +854,14 @@ async function onImpactUrgencyChange() {
   const impact = $('#fImpact').value;
   const urgency = $('#fUrgency').value;
   await fireEvent(t, 'set_impact_urgency', { impact, urgency });
+}
+
+async function onPriorityChange() {
+  const t = state.currentTicket;
+  if (!t) return;
+  const priority = $('#fPriority').value;
+  if (!priority) return;
+  await fireEvent(t, 'set_priority', { priority });
 }
 
 async function onGroupChange() {
@@ -1209,6 +1365,9 @@ async function waitForServer() {
 
   // Queue row click via delegation
   document.getElementById('viewContainer').addEventListener('click', (e) => {
+    // CI row click -> open CI detail
+    const ciRow = e.target.closest('tr.ci-row[data-ci]');
+    if (ciRow) { openCiDetail(ciRow.dataset.ci); return; }
     const tr = e.target.closest('tr[data-idx]');
     if (tr) openIncident(Number(tr.dataset.idx));
   });
@@ -1218,6 +1377,7 @@ async function waitForServer() {
     if (!state.currentTicket) return;
     const id = e.target.id;
     if (id === 'fImpact' || id === 'fUrgency') return onImpactUrgencyChange();
+    if (id === 'fPriority') return onPriorityChange();
     if (id === 'fGroup') return onGroupChange();
     if (id === 'fCategory') return renderIncidentView(state.currentTicket);
   });

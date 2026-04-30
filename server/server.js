@@ -9,6 +9,7 @@ const ticketsRouter = require('./routes/tickets.routes');
 const scenariosRouter = require('./routes/scenarios.routes');
 const servicenowRouter = require('./routes/servicenow.routes');
 const resourcesRouter = require('./routes/resources.routes');
+const cisRouter = require('./routes/cis.routes');
 
 function startServer(port = 3017) {
   const app = express();
@@ -45,6 +46,7 @@ function startServer(port = 3017) {
   app.use('/api', scenariosRouter);
   app.use('/api', servicenowRouter);
   app.use('/api', resourcesRouter);
+  app.use('/api', cisRouter);
 
   const server = app.listen(port, '127.0.0.1', () => {
     console.log(`Help Desk API listening on http://127.0.0.1:${port}`);

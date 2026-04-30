@@ -8,6 +8,7 @@ const COLS = [
   'rationale','source','sn_sys_id','scenario_id','hints_used',
   'notes','caller_label','subcategory','business_service','cmdb_ci',
   'tool_clues','learning_objectives',
+  'expected_priority','expected_impact','expected_urgency','expected_assignment_group',
   'created_at','resolved_at','resolution'
 ];
 
@@ -33,6 +34,8 @@ function insertTicket(t) {
     t.hints_used || 0, ser(t.notes, []),
     t.caller_label || '', t.subcategory || '', t.business_service || '', t.cmdb_ci || '',
     ser(t.tool_clues, {}), ser(t.learning_objectives, []),
+    t.expected_priority ?? null, t.expected_impact ?? null, t.expected_urgency ?? null,
+    t.expected_assignment_group || '',
     t.created_at || new Date().toISOString(),
     t.resolved_at || null, ser(t.resolution, null)
   );
@@ -55,7 +58,7 @@ function getSessionTickets(session_id) {
 
 function updateTicket(id, updates) {
   const db = getDb();
-  const allowed = ['state','assignment_group','impact','urgency','notes','hints_used','resolved_at','resolution'];
+  const allowed = ['state','assignment_group','impact','urgency','priority','notes','hints_used','resolved_at','resolution'];
   const sets = [];
   const vals = [];
   for (const [k, v] of Object.entries(updates)) {
